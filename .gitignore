@@ -1,3 +1,4 @@
+/.idea
 #Не храним папку Bitrix в GIT
 /bitrix/*
 #But not the templates and non bitrix components
@@ -10,4 +11,4 @@
 #Хранить Upload тоже нет смысла
 /upload/
 #По желанию добавляем свои папки и файлы (можно из PHPStorm).
-/.idea
+/local/php_interface/vendor
