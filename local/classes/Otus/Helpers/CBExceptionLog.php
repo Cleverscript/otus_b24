@@ -7,7 +7,7 @@ use Bitrix\Main\Diag\FileExceptionHandlerLog;
 
 class CBExceptionLog extends FileExceptionHandlerLog
 {
-    const DEFAULT_LOG_FILE = "bitrix/exceptions.log";
+    const DEFAULT_LOG_FILE = "local/logs/CBExceptionLog.log";
     private $level;
 
     /**
