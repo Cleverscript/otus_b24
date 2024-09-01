@@ -48,7 +48,7 @@ class CmpGridComplex extends CBitrixComponent
 
                 $this->arUrlTemplates = CComponentEngine::MakeComponentUrlTemplates(
                     $this->arDefaultUrlTemplates404,
-                    $arParams['SEF_URL_TEMPLATES']
+                    $this->arParams['SEF_URL_TEMPLATES']
                 );
 
                 /**

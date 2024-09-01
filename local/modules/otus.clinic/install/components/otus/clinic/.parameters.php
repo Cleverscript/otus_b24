@@ -6,6 +6,7 @@ use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Iblock\TypeTable;
 use Bitrix\Iblock\IblockTable;
+use Otus\Clinic\Helpers\IblockHelper;
 
 if (!Loader::includeModule('iblock')) {
 	return;
@@ -14,28 +15,14 @@ if (!Loader::includeModule('iblock')) {
 if (!Loader::includeModule('otus.clinic')) {
     return;
 }
+$iblockId = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_DOCTORS');
 
-$iblockId = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_DOCTORS"');
+$pops = IblockHelper::getIblockProps($iblockId);
+$arPropertys = $pops->getData();
 
-// Property codes
-$arPropertys = [];
-if ($iblockId ) {
-	$rsProp = CIBlockProperty::GetList(
-		[
-			'SORT' => 'ASC',
-			'NAME' => 'ASC',
-		],
-		[
-			'ACTIVE' => 'Y',
-			'IBLOCK_ID' => $iblockId,
-		]
-	);
-	while ($arr = $rsProp->Fetch()) {
-		if (in_array($arr['PROPERTY_TYPE'], ['L', 'N', 'S', 'E'])) {
-			$arPropertys[$arr['CODE']] = '[' . $arr['CODE'] . '] ' . $arr['NAME'];
-		}
-	}
-}
+echo '<pre>';
+var_dump($arPropertys);
+echo '<pre>';
 
 $arComponentParameters = [
 	'GROUPS' => [

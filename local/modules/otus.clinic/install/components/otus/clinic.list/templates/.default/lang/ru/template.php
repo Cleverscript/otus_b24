@@ -1,2 +1,2 @@
 <?php
-$MESS['TN_TEST_LIST_TITLE'] = 'Компании';
+$MESS['OTUS_CLINIC_LIST_TITLE'] = 'Доктора';

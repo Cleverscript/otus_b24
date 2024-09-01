@@ -5,9 +5,9 @@ use Bitrix\Main\Loader;
 use Bitrix\Main\Result;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
-use Bitrix\Iblock\PropertyTable;
 use Otus\Clinic\Utils\BaseUtils;
 use Otus\Clinic\Services\DoctorService;
+use Otus\Clinic\Helpers\IblockHelper;
 
 class ClinicList extends CBitrixComponent
 {
@@ -18,6 +18,7 @@ class ClinicList extends CBitrixComponent
 	public static array $properties = [];
 
     protected static $iblockEntityId = null;
+    protected static $referencePropCode = null;
 
     public function onPrepareComponentParams($arParams)
     {
@@ -44,7 +45,10 @@ class ClinicList extends CBitrixComponent
             throw new \RuntimeException(Loc::getMessage('ERROR_FATAL_IBL_ID_NULL'));
         }
 
-		self::$fields = array_filter(self::prepareFields($this->arParams['LIST_FIELD_CODE']), fn($value) => $value !== '');
+        self::$referencePropCode = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_PROP_REFERENCE');
+
+
+		self::$fields = IblockHelper::prepareFields($this->arParams['LIST_FIELD_CODE']);
 
 		self::$properties = array_filter($this->arParams['LIST_PROPERTY_CODE'], fn($value) => $value !== '');
 
@@ -61,7 +65,11 @@ class ClinicList extends CBitrixComponent
 		$gridFilterValues = self::prepareFilterParams($gridFilterFields, $fieldsAndProperties);
 
 		$doctors = DoctorService::getDoctors(
-            self::prepareQueryParams($gridFilterValues, $gridSortValues),
+            [
+                'select' => self::prepareSelectParams(),
+                'filter' => self::prepareProperties($gridFilterValues),
+                'sort' => self::prepareProperties($gridSortValues),
+            ],
             self::$fields,
             self::$properties,
             self::$iblockEntityId
@@ -73,11 +81,14 @@ class ClinicList extends CBitrixComponent
 
 		$rows = self::getRows($doctors, $fieldsAndProperties);
 
+        if (!$rows->isSuccess()) {
+            throw new \RuntimeException(BaseUtils::extractErrorMessage($rows));
+        }
+
 		$this->arResult = [
-			'COMPANIES' => $doctors->getData(),
 			'GRID_ID' => self::GRID_ID,
 			'HEADERS' => $gridHeaders,
-			'ROWS' => $rows,
+			'ROWS' => $rows->getData(),
 			'SORT' => $gridSortValues,
 			'FILTER' => $gridFilterFields,
 			'ENABLE_LIVE_SEARCH' => false,
@@ -87,39 +98,50 @@ class ClinicList extends CBitrixComponent
 		$this->IncludeComponentTemplate();
 	}
 
-	private function getRows(Result $doctors, array $fieldsAndProperties): array
+	private function getRows(Result $doctors, array $fieldsAndProperties): Result
 	{
 		$rows = [];
+        $result = new Result;
 
-		foreach ($doctors->getData() as $key => $item) {
+        if (!$doctors->isSuccess()) {
+            return $result->addError(new Error(BaseUtils::extractErrorMessage($doctors)));
+        }
+
+        $doctors = $doctors->getData();
+        //echo '<pre>';
+        //var_dump($doctors);
+        //echo '<pre>';
+
+		foreach ($doctors as $key => $item) {
             // Формируем ссылку на детальную страницу
             $template = ($this->arParams['SEF_MODE']=='Y')?
-                $this->arParams['SEF_URL_TEMPLATES']['detail'] : $this->arParams['SEF_FOLDER'] . '?ID=#ID#';
+                $this->arParams['SEF_FOLDER'] . '' . $this->arParams['SEF_URL_TEMPLATES']['detail'] : $this->arParams['SEF_FOLDER'] . '?ID=#ID#';
 
 			$viewUrl = CComponentEngine::makePathFromTemplate(
                 $template,
-				['ID' => $item['ID']]
+				['ID' => $item['ELEMENT.ID']]
 			);
 
 			$rows[] = [
-				'id' => $item['ID'],
+				'id' => $item['ELEMENT.ID'],
 				'data' => $item,
 			];
 
 			foreach ($fieldsAndProperties as $column) {
                 switch ($column) {
-                    case 'NAME': {
+                    case 'ELEMENT.NAME': {
                         $value = '<a href="' . htmlspecialcharsEx(
                                 $viewUrl
-                            ) . '" target="_self">' . $item['NAME'] . '</a>';
+                            ) . '" target="_self">' . $item['ELEMENT.NAME'] . '</a>';
 
                         break;
                     }
-                    case 'DESCRIPTION': {
-                        $value = null;
-                        if (!empty($item['DESCRIPTION'])) {
-                            $value = unserialize($item['DESCRIPTION'])['TEXT'] ?: null;
-                        }
+                    case 'ELEMENT.DETAIL_PICTURE':
+                    case 'ELEMENT.PREVIEW_PICTURE': {
+                        $id = $item['ELEMENT.PREVIEW_PICTURE']?: $item['ELEMENT.DETAIL_PICTURE'];
+                        $file = CFile::ResizeImageGet($id, ["width"=> 50, "height"=> 50], BX_RESIZE_IMAGE_EXACT, true);
+
+                        $value = "<img width=\"{$file['width']}\" height=\"{$file['height']}\" alt=\"\" src=\"{$file['src']}\" />";
 
                         break;
                     }
@@ -127,31 +149,22 @@ class ClinicList extends CBitrixComponent
                         $value = $item[$column];
                     }
                 }
+
+                // Получаем данные из reference по ID занчений сохраненных в св-ве
+                if (is_array($value)) {
+                    $multiPropVals = [];
+                    foreach ($value as $id) {
+                        $multiPropVals[] = $doctors[$key][str_replace('_ID', '', self::$referencePropCode)][$id];
+                    }
+                    $value = implode(', ', array_filter($multiPropVals));
+                }
 				
 				$rows[$key]['columns'][$column] = $value;
 			}
 		}
 
-		return $rows;
+		return $result->setData($rows);
 	}
-
-    /**
-     * К стандартным полям ИБ добавляем ELEMENT что бы работал Query
-     * @param array $fields
-     * @return array
-     */
-    private static function prepareFields(array $fields): array
-    {
-        $fields = array_filter($fields);
-
-        if (!in_array('ID', $fields)) {
-            $fields[] = 'ID';
-        }
-
-        $fields = array_map(fn($value) => "ELEMENT.{$value}", $fields);
-
-        return $fields;
-    }
 
 	private static function prepareProperties(array $props): array
 	{
@@ -177,19 +190,15 @@ class ClinicList extends CBitrixComponent
 		$result = ['PROCEDURES'];
 
 		foreach (self::$properties as $property) {
-			$result[$property . '_VALUE'] = $property . '.VALUE';
+            // Для св-ва "связи" не нужно подставлять .VALUE
+            if (self::$referencePropCode == $property) {
+                $result[$property . '_VALUE'] = $property;
+            } else {
+                $result[$property . '_VALUE'] = $property . '.VALUE';
+            }
 		}
 
 		return array_merge($result, self::$fields);
-	}
-
-	private static function prepareQueryParams(array $gridFilterValues, array $gridSortValues): array
-	{
-		return [
-			'select' => self::prepareSelectParams(),
-			'filter' => self::prepareProperties($gridFilterValues),
-			'sort' => self::prepareProperties($gridSortValues),
-		];
 	}
 
 	private static function prepareSortParams(array $fieldsAndProperties): array
@@ -264,36 +273,10 @@ class ClinicList extends CBitrixComponent
 		return $filterFields;
 	}
 
-	private static function getFieldNames(): array
-	{
-		$names = [];
-
-		foreach (self::$fields as $field) {
-			$names[$field] = Loc::getMessage('IBLOCK_FIELD_' . $field);
-		}
-
-		return $names;
-	}
-	private static function getPropertiesNames(): array
-	{
-		$names = [];
-
-		$result = PropertyTable::query()
-			->setSelect(['NAME', 'CODE'])
-			->setFilter(['CODE' => self::$properties ])
-			->exec();
-
-		foreach ($result as $item) {
-			$names[$item['CODE']] = $item['NAME'];
-		}
-
-		return $names;
-	}
-
 	private static function getNames(): array
 	{
-		$fieldNames = self::getFieldNames();
-		$propertiesNames = self::getPropertiesNames();
+		$fieldNames = IblockHelper::getFieldNames(self::$fields);
+		$propertiesNames = IblockHelper::getPropertiesNames(self::$properties);
 
 		return array_merge($fieldNames, $propertiesNames);
 	}

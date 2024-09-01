@@ -1,9 +1,9 @@
 <?php
 use Bitrix\Main;
 use Bitrix\Main\Loader;
+use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\HttpApplication;
-use Bitrix\Main\Config\Option;
 use Otus\Clinic\Helpers\IblockHelper;
 use Otus\Clinic\Utils\BaseUtils;
 
@@ -26,6 +26,12 @@ if (!$iblocks->isSuccess()) {
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocks));
 }
 
+$doctorsIblId = Option::get($module_id , 'OTUS_CLINIC_IBLOCK_DOCTORS');
+if ($doctorsIblId) {
+    $pops = IblockHelper::getIblockProps($doctorsIblId);
+    $arPropertys = $pops->getData();
+}
+
 $arMainPropsTab = [
     "DIV" => "edit1",
     "TAB" => Loc::getMessage("OTUS_CLINIC_MAIN_TAB_SETTINGS"),
@@ -44,6 +50,13 @@ $arMainPropsTab = [
             Loc::getMessage("T_OTUS_CLINIC_IBLOCK_PROCEDURES"),
             null,
             ["selectbox", $iblocks->getData()]
+        ],
+
+        [
+            "OTUS_CLINIC_IBLOCK_PROP_REFERENCE",
+            Loc::getMessage("T_OTUS_CLINIC_IBLOCK_PROP_REFERENCE"),
+            null,
+            ["selectbox", $arPropertys]
         ],
 
     ]

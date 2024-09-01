@@ -9,10 +9,9 @@
 
 use Bitrix\Main\Localization\Loc;
 
-$APPLICATION->SetTitle(Loc::getMessage('TN_TEST_LIST_TITLE'));
-?>
+$APPLICATION->SetTitle(Loc::getMessage('OTUS_CLINIC_LIST_TITLE'));
 
-<?$APPLICATION->IncludeComponent(
+$APPLICATION->IncludeComponent(
 	'bitrix:crm.interface.grid',
 	'titleflex',
 	[
@@ -32,4 +31,4 @@ $APPLICATION->SetTitle(Loc::getMessage('TN_TEST_LIST_TITLE'));
 	],
 	$this->getComponent(),
 	['HIDE_ICONS' => 'Y',]
-);?>
+);

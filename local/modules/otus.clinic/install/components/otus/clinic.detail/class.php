@@ -1,11 +1,18 @@
 <?php
 
+use Bitrix\Main\Loader;
+use Bitrix\Main\Config\Option;
 use Bitrix\Iblock\PropertyTable;
 use Bitrix\Main\Localization\Loc;
-use Bitrix\Iblock\Iblock;
+use Otus\Clinic\Services\DoctorService;
+use Otus\Clinic\Helpers\IblockHelper;
+use Otus\Clinic\Utils\BaseUtils;
 
-class GridDetail extends CBitrixComponent
+class ClinicDetail extends CBitrixComponent
 {
+    protected static $iblockEntityId = null;
+    protected static $referencePropCode = null;
+
     public function onPrepareComponentParams($arParams)
     {
         $result = [
@@ -19,29 +26,40 @@ class GridDetail extends CBitrixComponent
 
 	public function executeComponent()
 	{
+        if (!Loader::includeModule('otus.clinic')) {
+            throw new \RuntimeException(Loc::getMessage('ERROR_NOT_INCLUDE_MODULE'));
+        }
+
+        Loc::loadMessages(__FILE__);
+
+        self::$iblockEntityId = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_DOCTORS');
+
+        if (!intval(self::$iblockEntityId)) {
+            throw new \RuntimeException(Loc::getMessage('ERROR_FATAL_IBL_ID_NULL'));
+        }
+
+        self::$referencePropCode = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_PROP_REFERENCE');
+
 		if ($this->startResultCache()) {
 
 			$fields = $this->arParams['DETAIL_FIELD_CODE'];
 			$properties = $this->arParams['DETAIL_PROPERTY_CODE'];
-			$fields = array_filter($fields);
+			$fields = IblockHelper::prepareFields($fields);
 			$properties = array_filter($properties);
 	
-			//debug($fields);
-			//debug($this->arParams);
-	
 			$params['select'] = self::prepareSelectParams($fields, $properties);
-			$params['filter'] = $this->__parent->arVariables;
+			$params['filter'] = ['ELEMENT.ID' => $this->__parent->arVariables['ID']];
 
 			$names = self::getPropertyNames($properties, $fields);
 
-			$company = self::getCompany($fields, $properties, $params);
+			$doctor = DoctorService::getDoctor($fields, $properties, $params);
 
-			if (empty($company)) {
-				ShowError(Loc::getMessage('TN_TEST_COMPANIES_NOT_FOUND'));
+			if (!$doctor->isSuccess()) {
+				ShowError(BaseUtils::extractErrorMessage($doctor));
 				$this->abortResultCache();
 			}
 
-			$this->arResult = $company;
+			$this->arResult = $doctor->getData();
 			$this->arResult['NAMES'] = $names;
 
 			$this->SetResultCacheKeys([]);
@@ -58,40 +76,21 @@ class GridDetail extends CBitrixComponent
 		));
 	}
 
-	private static function prepareSelectParams(array $fields, $properties): array
-	{
-		$result = [];
+    private static function prepareSelectParams(array $fields, array $properties): array
+    {
+        $result = ['PROCEDURES'];
 
-		foreach ($properties as $property) {
-			$result[$property . '_VALUE'] = $property . '.VALUE';
-		}
+        foreach ($properties as $property) {
+            // Для св-ва "связи" не нужно подставлять .VALUE
+            if (self::$referencePropCode == $property) {
+                $result[$property . '_VALUE'] = $property;
+            } else {
+                $result[$property . '_VALUE'] = $property . '.VALUE';
+            }
+        }
 
-		return array_merge($result, $fields);
-	}
-
-	private function getCompany(array $fields, array $properties, array $params): array
-	{
-		$iblock = Iblock::wakeUp($this->arParams['IBLOCK_ID'])->getEntityDataClass();
-
-		$result = $iblock::query()
-			->setSelect($params['select'])
-			->setFilter($params['filter'])
-			->exec();
-
-		$company = [];
-
-		foreach ($result as $item) {
-			foreach ($fields as $field) {
-				$company['FIELDS'][$field] = $item[$field];
-			}
-
-			foreach ($properties as $property) {
-				$company['PROPERTIES'][$property] = $item[$property . '_VALUE'];
-			}
-		}
-
-		return $company;
-	}
+        return array_merge($result, $fields);
+    }
 
 	private static function getPropertyNames(array $properties, array $fields): array
 	{
