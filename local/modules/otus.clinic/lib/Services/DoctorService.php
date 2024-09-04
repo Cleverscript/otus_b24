@@ -33,6 +33,10 @@ class DoctorService
             return $result;
         }
 
+        echo '<pre>';
+        var_dump($params['select']);
+        echo '<pre>';
+
         $rows = DoctorsTable::query()
             ->setSelect($params['select'])
             ->setOrder($params['sort'])
@@ -47,10 +51,6 @@ class DoctorService
 
         foreach ($rows as $key => $item)
         {
-            //echo '<pre>';
-           // var_dump($item, $properties);
-            //echo '<pre>';
-
             foreach ($fields as $field) {
                 $entityKey = BaseUtils::getFieldKeyByEntityClass(DoctorsTable::class, $field);
                 //$field = BaseUtils::getFieldNameElement($field);
@@ -91,17 +91,17 @@ class DoctorService
         foreach ($rows as $item) {
             foreach ($fields as $field) {
                 $entityKey = BaseUtils::getFieldKeyByEntityClass(DoctorsTable::class, $field);
-                $data['FIELDS'][$field] = $item[$entityKey];
+                $data['ITEM'][$field] = $item[$entityKey];
             }
 
             foreach ($properties as $property) {
                 // наименования эл-тов по reference также прокидываем в результ массив
                 if ($referencePropCode == $property) {
                     $refPropCode = str_replace('_ID', '', $property);
-                    $data['PROPERTIES'][$refPropCode] = $item[$refPropCode];
-                    $data['PROPERTIES'][$property] = $item[$property . '_VALUE'];
+                    $data['ITEM'][$refPropCode] = $item[$refPropCode];
+                    //$data['ITEM'][$property] = $item[$property . '_VALUE'];
                 } else {
-                    $data['PROPERTIES'][$property] = $item[$property . '_VALUE'];
+                    $data['ITEM'][$property] = $item[$property . '_VALUE'];
                 }
             }
         }

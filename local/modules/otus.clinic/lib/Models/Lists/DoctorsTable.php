@@ -3,8 +3,11 @@
 namespace Otus\Clinic\Models\Lists;
 
 use Bitrix\Main\Config\Option;
+use Otus\Clinic\Models\Lists\ProceduresTable;
 use Otus\Clinic\Models\AbstractIblockPropertyValuesTable;
 use Bitrix\Main\ORM\Fields\ExpressionField;
+use Bitrix\Main\ORM\Fields\Relations\Reference;
+use Bitrix\Main\ORM\Query\Join;
 
 class DoctorsTable extends AbstractIblockPropertyValuesTable
 {
@@ -40,6 +43,13 @@ class DoctorsTable extends AbstractIblockPropertyValuesTable
             ['fetch_data_modification' => [static::class, 'getMultipleFieldIdValueModifier']]
         );
 
-        return parent::getMap() + $map;
+
+        /*$map['PROCED_NEW'] =
+            (new Reference('PROCEDURES_NEW_ID',
+                ProceduresTable::class,
+                Join::on('this.PROCEDURES_NEW_ID', 'ref.ID')
+            ));*/
+
+        return array_merge(parent::getMap(), $map);
     }
 }

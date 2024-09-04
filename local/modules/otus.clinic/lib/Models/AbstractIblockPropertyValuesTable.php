@@ -74,6 +74,7 @@ abstract class AbstractIblockPropertyValuesTable extends DataManager
 
             foreach (static::getProperties() as $property) {
                 if ($property['MULTIPLE'] === 'Y') {
+
                     $map[$property['CODE']] = new ExpressionField(
                         $property['CODE'],
                         sprintf('(select group_concat(`VALUE` SEPARATOR "\0") as VALUE from %s as m where m.IBLOCK_ELEMENT_ID = %s and m.IBLOCK_PROPERTY_ID = %d)',
