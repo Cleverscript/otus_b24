@@ -60,7 +60,7 @@ class IblockHelper
         $iblockFields = self::getIblockFields();
 
         foreach ($fields as $field) {
-            $data[$field] = $iblockFields[str_replace('ELEMENT.', '', $field)];
+            $data[$field] = $iblockFields[$field];
         }
 
         return $data;
@@ -107,7 +107,6 @@ class IblockHelper
     }
 
     /**
-     * К стандартным полям ИБ добавляем ELEMENT что бы работал Query
      * @param array $fields
      * @return array
      */
@@ -118,8 +117,6 @@ class IblockHelper
         if (!in_array('ID', $fields)) {
             $fields[] = 'ID';
         }
-
-        $fields = array_map(fn($value) => "ELEMENT.{$value}", $fields);
 
         return $fields;
     }

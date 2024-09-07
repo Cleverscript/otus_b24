@@ -2,15 +2,17 @@
 
 namespace Otus\Clinic\Services;
 
-use Bitrix\Bizproc\Workflow\Template\Packer\Result\Pack;
 use Bitrix\Main\Result;
 use Bitrix\Main\Error;
+use Bitrix\Iblock\Iblock;
 use Bitrix\Main\Config\Option;
 use Otus\Clinic\Models\Lists\DoctorsTable;
 use Otus\Clinic\Utils\BaseUtils;
 
 class DoctorService
 {
+    public static $iblockId;
+
     public static function getDoctors(array $params, array $fields, array $properties, int $iblId): Result
     {
         $arData = [];
@@ -33,39 +35,45 @@ class DoctorService
             return $result;
         }
 
-        $rows = DoctorsTable::query()
-            ->setSelect($params['select'])
+        self::$iblockId = (int) Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_DOCTORS');
+        $entity = Iblock::wakeUp(self::$iblockId)->getEntityDataClass();
+
+        $collection = $entity::query()
+            ->setSelect(array_merge($params['select'], [
+                'PROCEDURES_ID.ELEMENT.NAME',
+                'PROCEDURES_ID.ELEMENT.COLOR.VALUE'
+            ]))
             ->setOrder($params['sort'])
             ->setFilter($params['filter'])
-            ->exec();
+            ->fetchCollection();
 
-        if (empty($rows)) {
+        if (empty($collection)) {
             return $result->addError(new Error(
                 "There are no elements to display from the infoblock. #{$iblId}"
             ));
         }
 
-        foreach ($rows as $key => $item)
-        {
-            //echo '<pre>';
-           // var_dump($item, $properties);
-            //echo '<pre>';
+        foreach ($collection as $doctor) {
+            $arData[$doctor->getId()]['ID'] = $doctor->getId();
+            $arData[$doctor->getId()]['NAME'] = $doctor->getName();
 
             foreach ($fields as $field) {
-                $entityKey = BaseUtils::getFieldKeyByEntityClass(DoctorsTable::class, $field);
-                //$field = BaseUtils::getFieldNameElement($field);
-
-                $arData[$key][$field] = $item[$entityKey];
+                $arData[$doctor->getId()][$field] = $doctor->get($field);
             }
 
             foreach ($properties as $property) {
-                // наименования эл-тов по reference также прокидываем в результ массив
-                if ($referencePropCode == $property) {
-                    $refPropCode = str_replace('_ID', '', $property);
-                    $arData[$key][$refPropCode] = $item[$refPropCode];
-                    $arData[$key][$property] = $item[$property . '_VALUE'];
+                if ($referencePropCode != $property) {
+                    $arData[$doctor->getId()][$field] = $doctor->get($property);
                 } else {
-                    $arData[$key][$property] = $item[$property . '_VALUE'];
+                    // Если св-во с кодом св-ва указанного для связи инфоблоков
+                    foreach ($doctor->get($property) as $procedure) {
+                        $procedureName = $procedure->getElement()->getName();
+                        $colors = $procedure->getElement()->getColor();
+
+                        foreach ($colors as $color) {
+                            $arData[$doctor->getId()][$property][$procedureName][] = $color->getValue();
+                        }
+                    }
                 }
             }
         }
@@ -91,17 +99,17 @@ class DoctorService
         foreach ($rows as $item) {
             foreach ($fields as $field) {
                 $entityKey = BaseUtils::getFieldKeyByEntityClass(DoctorsTable::class, $field);
-                $data['FIELDS'][$field] = $item[$entityKey];
+                $data['ITEM'][$field] = $item[$entityKey];
             }
 
             foreach ($properties as $property) {
                 // наименования эл-тов по reference также прокидываем в результ массив
                 if ($referencePropCode == $property) {
                     $refPropCode = str_replace('_ID', '', $property);
-                    $data['PROPERTIES'][$refPropCode] = $item[$refPropCode];
-                    $data['PROPERTIES'][$property] = $item[$property . '_VALUE'];
+                    $data['ITEM'][$refPropCode] = $item[$refPropCode];
+                    //$data['ITEM'][$property] = $item[$property . '_VALUE'];
                 } else {
-                    $data['PROPERTIES'][$property] = $item[$property . '_VALUE'];
+                    $data['ITEM'][$property] = $item[$property . '_VALUE'];
                 }
             }
         }

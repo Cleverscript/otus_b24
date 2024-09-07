@@ -145,14 +145,6 @@ class otus_clinic extends CModule
     function InstallEvents()
     {
         $eventManager = EventManager::getInstance();
-        $eventManager->registerEventHandler(
-            'main',
-            'OnBuildGlobalMenu',
-            $this->MODULE_ID,
-            '\Itscript\Qna\Menu',
-            'adminOnBuildGlobalMenu',
-            9999
-        );
     }
 
     /**
@@ -161,13 +153,6 @@ class otus_clinic extends CModule
     function UnInstallEvents()
     {
         $eventManager = EventManager::getInstance();
-        $eventManager->unRegisterEventHandler(
-            'main',
-            'OnBuildGlobalMenu',
-            $this->MODULE_ID,
-            '\Itscript\Qna\Menu',
-            'adminOnBuildGlobalMenu'
-        );
     }
 
 

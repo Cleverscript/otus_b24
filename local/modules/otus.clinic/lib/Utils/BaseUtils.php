@@ -44,6 +44,6 @@ class BaseUtils
             throw new \Exception('Field name is empty');
         }
 
-        return str_replace('ELEMENT.', '', $name);
+        return $name;
     }
 }

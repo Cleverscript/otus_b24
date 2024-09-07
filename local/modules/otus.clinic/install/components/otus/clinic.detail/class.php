@@ -24,8 +24,8 @@ class ClinicDetail extends CBitrixComponent
         return array_merge($result, $this->__parent->arParams);
     }
 
-	public function executeComponent()
-	{
+    public function executeComponent()
+    {
         if (!Loader::includeModule('otus.clinic')) {
             throw new \RuntimeException(Loc::getMessage('ERROR_NOT_INCLUDE_MODULE'));
         }
@@ -40,41 +40,57 @@ class ClinicDetail extends CBitrixComponent
 
         self::$referencePropCode = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_PROP_REFERENCE');
 
-		if ($this->startResultCache()) {
+        if ($this->startResultCache()) {
 
-			$fields = $this->arParams['DETAIL_FIELD_CODE'];
-			$properties = $this->arParams['DETAIL_PROPERTY_CODE'];
-			$fields = IblockHelper::prepareFields($fields);
-			$properties = array_filter($properties);
-	
-			$params['select'] = self::prepareSelectParams($fields, $properties);
-			$params['filter'] = ['ELEMENT.ID' => $this->__parent->arVariables['ID']];
+            $fields = $this->arParams['DETAIL_FIELD_CODE'];
+            $properties = $this->arParams['DETAIL_PROPERTY_CODE'];
+            $fields = IblockHelper::prepareFields($fields);
+            $properties = array_filter($properties);
 
-			$names = self::getPropertyNames($properties, $fields);
+            $params['select'] = self::prepareSelectParams($fields, $properties);
+            $params['filter'] = ['ELEMENT.ID' => $this->__parent->arVariables['ID']];
 
-			$doctor = DoctorService::getDoctor($fields, $properties, $params);
+            $doctor = DoctorService::getDoctor($fields, $properties, $params);
 
-			if (!$doctor->isSuccess()) {
-				ShowError(BaseUtils::extractErrorMessage($doctor));
-				$this->abortResultCache();
-			}
+            if (!$doctor->isSuccess()) {
+                ShowError(BaseUtils::extractErrorMessage($doctor));
+                $this->abortResultCache();
+            }
 
-			$this->arResult = $doctor->getData();
-			$this->arResult['NAMES'] = $names;
+            $row = $doctor->getData();
 
-			$this->SetResultCacheKeys([]);
-		}
+            foreach ($row['ITEM'] as $key => $val) {
+                switch ($key) {
+                    case 'ELEMENT.DETAIL_PICTURE':
+                    case 'ELEMENT.PREVIEW_PICTURE': {
+                        $file = \CFile::ResizeImageGet($val, ["width"=> 200, "height"=> 200], BX_RESIZE_IMAGE_EXACT, true);
+                        $row['ITEM'][$key] = "<br/><img width=\"{$file['width']}\" height=\"{$file['height']}\" alt=\"\" src=\"{$file['src']}\" />";
+                        break;
+                    }
+                }
 
-		$this->includeComponentTemplate();
+                // Получаем данные из reference по ID занчений сохраненных в св-ве
+                if (is_array($val)) {
+                    $row['ITEM'][$key] = implode(', ', $val);
+                }
+            }
 
-		global $APPLICATION;
-		$APPLICATION->SetTitle(Loc::getMessage(
-			'TN_TEST_COMPANIES_SHOW_TITLE',
-			[
-				'#NAME#' => $this->arResult['FIELDS']['NAME'],
-			]
-		));
-	}
+            $this->arResult = $row;
+            $this->arResult['NAMES'] = array_merge(IblockHelper::getPropertiesNames($properties), IblockHelper::getFieldNames($fields));
+
+            $this->SetResultCacheKeys([]);
+        }
+
+        $this->includeComponentTemplate();
+
+        global $APPLICATION;
+        $APPLICATION->SetTitle(Loc::getMessage(
+            'T_OTUS_DOCTOR_DETAIL_TITLE',
+            [
+                '#NAME#' => $this->arResult['FIELDS']['NAME'],
+            ]
+        ));
+    }
 
     private static function prepareSelectParams(array $fields, array $properties): array
     {
@@ -91,24 +107,4 @@ class ClinicDetail extends CBitrixComponent
 
         return array_merge($result, $fields);
     }
-
-	private static function getPropertyNames(array $properties, array $fields): array
-	{
-		$names = [];
-		
-		$result = PropertyTable::query()
-			->setSelect(['NAME', 'CODE'])
-			->setFilter(['CODE' => $properties])
-			->exec();
-
-		foreach ($result as $item) {
-			$names[$item['CODE']] = $item['NAME'];
-		}
-
-		foreach ($fields as $field) {
-			$names[$field] = Loc::getMessage('IBLOCK_FIELD_' . $field);
-		}
-
-		return $names;
-	}
 }

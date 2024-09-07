@@ -47,10 +47,9 @@ class ClinicList extends CBitrixComponent
 
         self::$referencePropCode = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_PROP_REFERENCE');
 
-
 		self::$fields = IblockHelper::prepareFields($this->arParams['LIST_FIELD_CODE']);
 
-		self::$properties = array_filter($this->arParams['LIST_PROPERTY_CODE'], fn($value) => $value !== '');
+		self::$properties = array_filter($this->arParams['LIST_PROPERTY_CODE']);
 
 		$fieldsAndProperties = array_merge(self::$fields, self::$properties);
 
@@ -119,29 +118,37 @@ class ClinicList extends CBitrixComponent
 
 			$viewUrl = CComponentEngine::makePathFromTemplate(
                 $template,
-				['ID' => $item['ELEMENT.ID']]
+				['ID' => $item['ID']]
 			);
 
-			$rows[] = [
-				'id' => $item['ELEMENT.ID'],
+			$rows[$key] = [
+				'id' => $item['ID'],
 				'data' => $item,
 			];
 
 			foreach ($fieldsAndProperties as $column) {
                 switch ($column) {
-                    case 'ELEMENT.NAME': {
+                    case 'NAME': {
                         $value = '<a href="' . htmlspecialcharsEx(
                                 $viewUrl
-                            ) . '" target="_self">' . $item['ELEMENT.NAME'] . '</a>';
+                            ) . '" target="_self">' . $item['NAME'] . '</a>';
 
                         break;
                     }
-                    case 'ELEMENT.DETAIL_PICTURE':
-                    case 'ELEMENT.PREVIEW_PICTURE': {
-                        $id = $item['ELEMENT.PREVIEW_PICTURE']?: $item['ELEMENT.DETAIL_PICTURE'];
+                    case 'DETAIL_PICTURE':
+                    case 'PREVIEW_PICTURE': {
+                        $id = $item['PREVIEW_PICTURE']?: $item['DETAIL_PICTURE'];
                         $file = CFile::ResizeImageGet($id, ["width"=> 50, "height"=> 50], BX_RESIZE_IMAGE_EXACT, true);
 
                         $value = "<img width=\"{$file['width']}\" height=\"{$file['height']}\" alt=\"\" src=\"{$file['src']}\" />";
+
+                        break;
+                    }
+                    case self::$referencePropCode: {
+                        $value = "";
+                        foreach ($item[$column] as $procedureName => $procedureColors) {
+                            $value .= "<span class=\"procedure-item\"><b style=\"background-color:{$procedureColors[0]}\"></b>{$procedureName}<span>&nbsp;";
+                        }
 
                         break;
                     }
@@ -150,15 +157,6 @@ class ClinicList extends CBitrixComponent
                     }
                 }
 
-                // Получаем данные из reference по ID занчений сохраненных в св-ве
-                if (is_array($value)) {
-                    $multiPropVals = [];
-                    foreach ($value as $id) {
-                        $multiPropVals[] = $doctors[$key][str_replace('_ID', '', self::$referencePropCode)][$id];
-                    }
-                    $value = implode(', ', array_filter($multiPropVals));
-                }
-				
 				$rows[$key]['columns'][$column] = $value;
 			}
 		}
@@ -187,7 +185,7 @@ class ClinicList extends CBitrixComponent
 
 	private static function prepareSelectParams(): array
 	{
-		$result = ['PROCEDURES'];
+		$result = []; //'PROCEDURES_ID'
 
 		foreach (self::$properties as $property) {
             // Для св-ва "связи" не нужно подставлять .VALUE
@@ -217,7 +215,7 @@ class ClinicList extends CBitrixComponent
 
 		if (empty($gridSortValues))
 		{
-			$gridSortValues = ['ELEMENT.ID' => 'asc'];
+			$gridSortValues = ['ID' => 'asc'];
 		}
 
 		return $gridSortValues;
