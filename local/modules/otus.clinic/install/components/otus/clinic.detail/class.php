@@ -48,7 +48,7 @@ class ClinicDetail extends CBitrixComponent
             $properties = array_filter($properties);
 
             $params['select'] = self::prepareSelectParams($fields, $properties);
-            $params['filter'] = ['ELEMENT.ID' => $this->__parent->arVariables['ID']];
+            $params['filter'] = ['ID' => $this->__parent->arVariables['ID']];
 
             $doctor = DoctorService::getDoctor($fields, $properties, $params);
 
@@ -59,19 +59,26 @@ class ClinicDetail extends CBitrixComponent
 
             $row = $doctor->getData();
 
-            foreach ($row['ITEM'] as $key => $val) {
+            foreach ($row as $key => $val) {
+                if (empty($val)) continue;
+
                 switch ($key) {
-                    case 'ELEMENT.DETAIL_PICTURE':
-                    case 'ELEMENT.PREVIEW_PICTURE': {
+                    case 'DETAIL_PICTURE':
+                    case 'PREVIEW_PICTURE': {
                         $file = \CFile::ResizeImageGet($val, ["width"=> 200, "height"=> 200], BX_RESIZE_IMAGE_EXACT, true);
                         $row['ITEM'][$key] = "<br/><img width=\"{$file['width']}\" height=\"{$file['height']}\" alt=\"\" src=\"{$file['src']}\" />";
                         break;
                     }
-                }
+                    case self::$referencePropCode: {
+                        foreach ($val as $procedureName => $procedureColors) {
+                            $row['ITEM'][$key] .= "<span class=\"procedure-item\"><b style=\"background-color:{$procedureColors[0]}\"></b>{$procedureName}<span>&nbsp;";
+                        }
 
-                // Получаем данные из reference по ID занчений сохраненных в св-ве
-                if (is_array($val)) {
-                    $row['ITEM'][$key] = implode(', ', $val);
+                        break;
+                    }
+                    default: {
+                        $row['ITEM'][$key] = $val;
+                    }
                 }
             }
 
@@ -94,7 +101,7 @@ class ClinicDetail extends CBitrixComponent
 
     private static function prepareSelectParams(array $fields, array $properties): array
     {
-        $result = ['PROCEDURES'];
+        $result = [];
 
         foreach ($properties as $property) {
             // Для св-ва "связи" не нужно подставлять .VALUE

@@ -3,8 +3,10 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 
 use Bitrix\Main\Loader;
 use Bitrix\Main\Result;
+use Bitrix\Main\Context;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\UI\PageNavigation;
 use Otus\Clinic\Utils\BaseUtils;
 use Otus\Clinic\Services\DoctorService;
 use Otus\Clinic\Helpers\IblockHelper;
@@ -12,6 +14,8 @@ use Otus\Clinic\Helpers\IblockHelper;
 class ClinicList extends CBitrixComponent
 {
     const GRID_ID = 'otus_clinic_list_grid_id';
+
+    private static $grid;
 
 	public static array $fields = [];
 
@@ -33,6 +37,9 @@ class ClinicList extends CBitrixComponent
 
 	public function executeComponent(): void
 	{
+        self::$grid = new Bitrix\Main\Grid\Options(self::GRID_ID);
+        $request = Context::getCurrent()->getRequest();
+
         if (!Loader::includeModule('otus.clinic')) {
             throw new \RuntimeException(Loc::getMessage('ERROR_NOT_INCLUDE_MODULE'));
         }
@@ -63,11 +70,25 @@ class ClinicList extends CBitrixComponent
 
 		$gridFilterValues = self::prepareFilterParams($gridFilterFields, $fieldsAndProperties);
 
+        // Page navigation
+        $gridNav = self::$grid->GetNavParams();
+        $pager = new PageNavigation('page');
+        $pager->setPageSize($gridNav['nPageSize']);
+        $pager->setRecordCount(DoctorService::getCount($gridFilterValues));
+        if ($request->offsetExists('page')) {
+            $currentPage = $request->get('page');
+            $pager->setCurrentPage($currentPage > 0 ? $currentPage : $pager->getPageCount());
+        } else {
+            $pager->setCurrentPage(1);
+        }
+
 		$doctors = DoctorService::getDoctors(
             [
                 'select' => self::prepareSelectParams(),
                 'filter' => self::prepareProperties($gridFilterValues),
                 'sort' => self::prepareProperties($gridSortValues),
+                'limit' => $pager->getLimit(),
+                'offset' => $pager->getOffset(),
             ],
             self::$fields,
             self::$properties,
@@ -92,6 +113,11 @@ class ClinicList extends CBitrixComponent
 			'FILTER' => $gridFilterFields,
 			'ENABLE_LIVE_SEARCH' => false,
 			'DISABLE_SEARCH' => true,
+            'PAGINATION' => array(
+                'PAGE_NUM' => $pager->getCurrentPage(),
+                'ENABLE_NEXT_PAGE' => $pager->getCurrentPage() < $pager->getPageCount(),
+                'URL' => $request->getRequestedPage(),
+            ),
 		];
 
 		$this->IncludeComponentTemplate();
@@ -107,12 +133,8 @@ class ClinicList extends CBitrixComponent
         }
 
         $doctors = $doctors->getData();
-        //echo '<pre>';
-        //var_dump($doctors);
-        //echo '<pre>';
 
 		foreach ($doctors as $key => $item) {
-            // Формируем ссылку на детальную страницу
             $template = ($this->arParams['SEF_MODE']=='Y')?
                 $this->arParams['SEF_FOLDER'] . '' . $this->arParams['SEF_URL_TEMPLATES']['detail'] : $this->arParams['SEF_FOLDER'] . '?ID=#ID#';
 
@@ -127,17 +149,19 @@ class ClinicList extends CBitrixComponent
 			];
 
 			foreach ($fieldsAndProperties as $column) {
+                $value = "";
+
                 switch ($column) {
                     case 'NAME': {
                         $value = '<a href="' . htmlspecialcharsEx(
                                 $viewUrl
-                            ) . '" target="_self">' . $item['NAME'] . '</a>';
+                            ) . '" target="_self">' . $item[$column] . '</a>';
 
                         break;
                     }
                     case 'DETAIL_PICTURE':
                     case 'PREVIEW_PICTURE': {
-                        $id = $item['PREVIEW_PICTURE']?: $item['DETAIL_PICTURE'];
+                        $id = $item['PREVIEW_PICTURE']?: $item[$column];
                         $file = CFile::ResizeImageGet($id, ["width"=> 50, "height"=> 50], BX_RESIZE_IMAGE_EXACT, true);
 
                         $value = "<img width=\"{$file['width']}\" height=\"{$file['height']}\" alt=\"\" src=\"{$file['src']}\" />";
@@ -145,7 +169,6 @@ class ClinicList extends CBitrixComponent
                         break;
                     }
                     case self::$referencePropCode: {
-                        $value = "";
                         foreach ($item[$column] as $procedureName => $procedureColors) {
                             $value .= "<span class=\"procedure-item\"><b style=\"background-color:{$procedureColors[0]}\"></b>{$procedureName}<span>&nbsp;";
                         }
@@ -188,7 +211,6 @@ class ClinicList extends CBitrixComponent
 		$result = []; //'PROCEDURES_ID'
 
 		foreach (self::$properties as $property) {
-            // Для св-ва "связи" не нужно подставлять .VALUE
             if (self::$referencePropCode == $property) {
                 $result[$property . '_VALUE'] = $property;
             } else {
@@ -201,9 +223,7 @@ class ClinicList extends CBitrixComponent
 
 	private static function prepareSortParams(array $fieldsAndProperties): array
 	{
-		$grid = new Bitrix\Main\Grid\Options(self::GRID_ID);
-
-		$gridSortValues = $grid->getSorting();
+		$gridSortValues = self::$grid->getSorting();
 
 		$gridSortValues = array_filter(
 			$gridSortValues['sort'],

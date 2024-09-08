@@ -40,11 +40,13 @@ class DoctorService
 
         $collection = $entity::query()
             ->setSelect(array_merge($params['select'], [
-                'PROCEDURES_ID.ELEMENT.NAME',
-                'PROCEDURES_ID.ELEMENT.COLOR.VALUE'
+                $referencePropCode . '.ELEMENT.NAME',
+                $referencePropCode . '.ELEMENT.COLOR.VALUE'
             ]))
             ->setOrder($params['sort'])
             ->setFilter($params['filter'])
+            ->setLimit($params['limit'])
+            ->setOffset($params['offset'])
             ->fetchCollection();
 
         if (empty($collection)) {
@@ -54,9 +56,6 @@ class DoctorService
         }
 
         foreach ($collection as $doctor) {
-            $arData[$doctor->getId()]['ID'] = $doctor->getId();
-            $arData[$doctor->getId()]['NAME'] = $doctor->getName();
-
             foreach ($fields as $field) {
                 $arData[$doctor->getId()][$field] = $doctor->get($field);
             }
@@ -83,37 +82,56 @@ class DoctorService
 
     public static function getDoctor(array $fields, array $properties, array $params): Result
     {
-        $data = [];
+        $arData = [];
         $result = new Result;
         $referencePropCode = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_PROP_REFERENCE');
 
-        $rows = DoctorsTable::query()
-            ->setSelect($params['select'])
-            ->setFilter($params['filter'])
-            ->exec();
+        self::$iblockId = (int) Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_DOCTORS');
+        $entity = Iblock::wakeUp(self::$iblockId)->getEntityDataClass();
 
-        if (empty($rows)) {
+        $collection = $entity::query()
+            ->setSelect(array_merge($params['select'], [
+                $referencePropCode. '.ELEMENT.NAME',
+                $referencePropCode. '.ELEMENT.COLOR.VALUE'
+            ]))
+            ->setFilter($params['filter'])
+            ->fetchCollection();
+
+        if (empty($collection)) {
             return $result->addError(new Error("Element not found"));
         }
 
-        foreach ($rows as $item) {
+        foreach ($collection as $doctor) {
             foreach ($fields as $field) {
-                $entityKey = BaseUtils::getFieldKeyByEntityClass(DoctorsTable::class, $field);
-                $data['ITEM'][$field] = $item[$entityKey];
+                $arData[$field] = $doctor->get($field);
             }
 
             foreach ($properties as $property) {
-                // наименования эл-тов по reference также прокидываем в результ массив
-                if ($referencePropCode == $property) {
-                    $refPropCode = str_replace('_ID', '', $property);
-                    $data['ITEM'][$refPropCode] = $item[$refPropCode];
-                    //$data['ITEM'][$property] = $item[$property . '_VALUE'];
+                if ($referencePropCode != $property) {
+                    $arData[$field] = $doctor->get($property);
                 } else {
-                    $data['ITEM'][$property] = $item[$property . '_VALUE'];
+                    // Если св-во с кодом св-ва указанного для связи инфоблоков
+                    foreach ($doctor->get($property) as $procedure) {
+                        $procedureName = $procedure->getElement()->getName();
+                        $colors = $procedure->getElement()->getColor();
+
+                        foreach ($colors as $color) {
+                            $arData[$property][$procedureName][] = $color->getValue();
+                        }
+                    }
                 }
             }
+
         }
 
-        return $result->setData($data);
+        return $result->setData($arData);
+    }
+
+    public static function getCount(array $gridFilterValues)
+    {
+        self::$iblockId = (int) Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_DOCTORS');
+        $entity = Iblock::wakeUp(self::$iblockId)->getEntityDataClass();
+
+        return $entity::getCount($gridFilterValues);
     }
 }

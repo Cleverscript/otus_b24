@@ -28,6 +28,7 @@ $APPLICATION->IncludeComponent(
 		'AJAX_LOADER' => null,
 		'SHOW_ROW_CHECKBOXES' => false,
 		'SHOW_NAVIGATION_PANEL'     => false,
+        'PAGINATION' => $arResult['PAGINATION'],
 	],
 	$this->getComponent(),
 	['HIDE_ICONS' => 'Y',]
