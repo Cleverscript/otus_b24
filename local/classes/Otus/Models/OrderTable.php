@@ -8,11 +8,11 @@ use Bitrix\Main\ORM\Fields\StringField;
 use Bitrix\Main\ORM\Fields\Relations\Reference;
 use Bitrix\Main\ORM\Fields\Validators\LengthValidator;
 
-class DealTable extends DataManager
+class OrderTable extends DataManager
 {
     public static function getTableName()
     {
-        return 'o_deal';
+        return 'otus_order';
     }
     public static function getMap()
     {
@@ -46,12 +46,12 @@ class DealTable extends DataManager
 
             'COMPANY' => (new Reference('COMPANY',
                 \Bitrix\Iblock\Elements\ElementCompanyTable::class,
-                Join::on('this.COMPANY_ID', 'ref.IBLOCK_ELEMENT_ID')
+                Join::on('this.COMPANY_ID', 'ref.ID')
             )),
 
             'CLIENT' => (new Reference('CLIENT',
                 \Bitrix\Iblock\Elements\ElementClientsTable::class,
-                Join::on('this.CLIENT_ID', 'ref.IBLOCK_ELEMENT_ID')
+                Join::on('this.CLIENT_ID', 'ref.ID')
             )),
         ];
     }

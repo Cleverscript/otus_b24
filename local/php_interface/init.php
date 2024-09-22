@@ -11,6 +11,7 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 
 // Bitrix autoload
 \Bitrix\Main\Loader::registerAutoLoadClasses(null, [
+    'Otus\Models\OrderTable' => '/local/classes/Otus/Models/OrderTable.php',
     //'Otus\Helpers\CBExceptionLog' => "/local/classes/Otus/Helpers/CBExceptionLog.php",
 ]);
 
