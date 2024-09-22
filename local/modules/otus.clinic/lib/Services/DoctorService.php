@@ -6,6 +6,7 @@ use Bitrix\Main\Result;
 use Bitrix\Main\Error;
 use Bitrix\Iblock\Iblock;
 use Bitrix\Main\Config\Option;
+use Bitrix\Main\ORM\Query\QueryHelper;
 use Otus\Clinic\Models\Lists\DoctorsTable;
 use Otus\Clinic\Utils\BaseUtils;
 
@@ -38,7 +39,7 @@ class DoctorService
         self::$iblockId = (int) Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_DOCTORS');
         $entity = Iblock::wakeUp(self::$iblockId)->getEntityDataClass();
 
-        $collection = $entity::query()
+        $query = $entity::query()
             ->setSelect(array_merge($params['select'], [
                 $referencePropCode . '.ELEMENT.NAME',
                 $referencePropCode . '.ELEMENT.COLOR.VALUE'
@@ -46,8 +47,9 @@ class DoctorService
             ->setOrder($params['sort'])
             ->setFilter($params['filter'])
             ->setLimit($params['limit'])
-            ->setOffset($params['offset'])
-            ->fetchCollection();
+            ->setOffset($params['offset']);
+
+        $collection = QueryHelper::decompose($query);
 
         if (empty($collection)) {
             return $result->addError(new Error(
