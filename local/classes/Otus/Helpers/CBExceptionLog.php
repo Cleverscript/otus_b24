@@ -10,19 +10,16 @@ class CBExceptionLog extends ExceptionHandlerLog
     const DEFAULT_LOG_FILE = "local/logs/CBExceptionLog.log";
     private $level;
 
+    /** @var Log\LoggerInterface */
+    protected $logger;
+
     /**
      * @param \Throwable $exception
      * @param int $logType
      */
     public function write($exception, $logType)
     {
-        //dump([$exception, $logType]);
-
-        //exit();
-
-        //dump($this->logger);
-        //$rclass = new \ReflectionClass($this->logger);
-        //dump($rclass->getMethods);
+        dump($this->logger);
 
         $text = ExceptionHandlerFormatter::format($exception, false, $this->level);
 
@@ -42,7 +39,7 @@ class CBExceptionLog extends ExceptionHandlerLog
     public function initialize(array $options)
     {
         echo '<pre>';
-        //var_dump($options);
+        var_dump($options);
         echo '</pre>';
     }
 }
