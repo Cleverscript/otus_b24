@@ -88,6 +88,7 @@ $orders = OrderTable::query()
 <hr/>
 <h3>Создать заказ</h3>
 <form action="" method="post">
+    <p>Наименование </p>
     <p>Компания:<select name="COMPANY_ID">
         <?php foreach($companys as $row): ?>
             <option value="<?=$row['ID'];?>"><?=$row['NAME'];?></option>
