@@ -7,6 +7,7 @@ use Bitrix\Main\Entity\Base;
 use Bitrix\Main\IO\Directory;
 use Bitrix\Main\ModuleManager;
 use Bitrix\Main\Localization\Loc;
+use Otus\Customtab\Models\OrderTable;
 
 Loc::loadMessages(__FILE__);
 
@@ -132,12 +133,13 @@ class otus_customtab extends CModule
     private function getEntities()
     {
         return [
-            Models\OrderTable::class
+            OrderTable::class
         ];
     }
 
     function InstallEvents()
     {
+        pLog('InstallEvents', 'InstallEvents.log');
         $this->eventManager->registerEventHandler(
             'main',
             'OnEpilog',

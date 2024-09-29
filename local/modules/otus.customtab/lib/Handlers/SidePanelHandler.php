@@ -1,6 +1,6 @@
 <?php
 
-namespace Otus\Customtab\Helpers;
+namespace Otus\Customtab\Handlers;
 
 use Bitrix\Main\Context;
 use Bitrix\Main\UI\Extension;
