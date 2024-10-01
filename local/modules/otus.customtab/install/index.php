@@ -133,13 +133,12 @@ class otus_customtab extends CModule
     private function getEntities()
     {
         return [
-            OrderTable::class
+            '\\' . OrderTable::class
         ];
     }
 
     function InstallEvents()
     {
-        pLog('InstallEvents', 'InstallEvents.log');
         $this->eventManager->registerEventHandler(
             'main',
             'OnEpilog',
@@ -198,6 +197,8 @@ class otus_customtab extends CModule
         $connection = Application::getConnection();
 
         $entities = $this->getEntities();
+
+        pLog($entities);
 
         foreach ($entities as $entity) {
             if (Application::getConnection($entity::getConnectionName())->isTableExists($entity::getTableName())) {

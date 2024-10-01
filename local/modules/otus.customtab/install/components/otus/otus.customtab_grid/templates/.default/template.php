@@ -1,4 +1,4 @@
-<?php
+<?php if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
 
 /**
  * @var $this CBitrixComponentTemplate
@@ -9,8 +9,31 @@
 
 use Bitrix\Main\Localization\Loc;
 
-$APPLICATION->SetTitle(Loc::getMessage('OTUS_CUSTOMTAB_LIST_TITLE'));
+if ($arParams['SET_PAGE_TITLE'] == 'Y') {
+    $APPLICATION->SetTitle(Loc::getMessage('OTUS_CUSTOMTAB_LIST_TITLE'));
+}
 
+$this->setFrameMode(true);
+
+$APPLICATION->IncludeComponent(
+    'bitrix:main.ui.grid',
+    '',
+    [
+        'GRID_ID' => $arResult['GRID_ID'],
+        'COLUMNS' => $arResult['COLUMNS'],
+        'ROWS' => $arResult['ROWS'],
+        'NAV_OBJECT' => $arResult['NAV_OBJECT'],
+        'ALLOW_SORT' => $arResult['ALLOW_SORT'],
+        "AJAX_MODE" => "Y",
+        "AJAX_OPTION_JUMP" => "N",
+        "AJAX_OPTION_HISTORY" => "N",
+        "SHOW_ROW_CHECKBOXES" =>$arResult['SHOW_ROW_CHECKBOXES'],
+        "SHOW_SELECTED_COUNTER" => false,
+        "SHOW_PAGESIZE" => false,
+    ]
+);
+
+/*
 $APPLICATION->IncludeComponent(
 	'bitrix:crm.interface.grid',
 	'titleflex',
@@ -33,3 +56,4 @@ $APPLICATION->IncludeComponent(
 	$this->getComponent(),
 	['HIDE_ICONS' => 'Y',]
 );
+*/

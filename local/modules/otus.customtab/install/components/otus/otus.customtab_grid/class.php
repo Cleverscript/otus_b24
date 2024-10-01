@@ -2,8 +2,10 @@
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 
 use Bitrix\Main\Loader;
+use Bitrix\Main\Error;
 use Bitrix\Main\Result;
 use Bitrix\Main\Context;
+use Bitrix\Main\Application;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\UI\PageNavigation;
 use Otus\Customtab\Models\OrderTable;
@@ -13,76 +15,90 @@ class CustomtabGrid extends CBitrixComponent
     const GRID_ID = 'otus_customtab_grid';
 	public function executeComponent(): void
 	{
-        $grid = new Bitrix\Main\Grid\Options(self::GRID_ID);
-        $request = Context::getCurrent()->getRequest();
+        try {
+            $grid = new Bitrix\Main\Grid\Options(self::GRID_ID);
+            $request = Context::getCurrent()->getRequest();
 
-        if (!Loader::includeModule('otus.clinic')) {
-            throw new \RuntimeException(Loc::getMessage('OTUS_CUSTOMTAB_FAIL_INCLUDE_MODULE'));
+            if (!Loader::includeModule('otus.customtab')) {
+                throw new \RuntimeException(Loc::getMessage('OTUS_CUSTOMTAB_FAIL_INCLUDE_MODULE'));
+            }
+
+            Loc::loadMessages(__FILE__);
+
+
+            if (isset($request['order_list'])) {
+                $page = explode('page-', $request['order_list']);
+                $page = $page[1];
+            } else {
+                $page = 1;
+            }
+
+            // Page navigation
+            $nav = new \Bitrix\Main\UI\PageNavigation('order_list');
+            $nav->allowAllRecords(false)->setPageSize($this->arParams['NUM_PAGE'])->initFromUri();
+            $nav->setRecordCount(self::getCount());
+
+
+            $gridColumns= self::getColumns();
+            if (!$gridColumns->isSuccess()) {
+                throw new \RuntimeException(implode(', ', $gridColumns->getErrorMessages()));
+            }
+
+            $gridRows = self::getRows($page, $this->arParams['NUM_PAGE']);
+
+            if (!$gridRows->isSuccess()) {
+                throw new \RuntimeException(implode(', ', $gridRows->getErrorMessages()));
+            }
+
+            $this->arResult = [
+                'GRID_ID' => self::GRID_ID,
+                'COLUMNS' => $gridColumns->getData(),
+                'ROWS' => $gridRows->getData(),
+                'NAV_OBJECT' => $nav,
+                'SHOW_ROW_CHECKBOXES' => $this->arParams['SHOW_ROW_CHECKBOXES']=='Y',
+                'ALLOW_SORT' => true,
+            ];
+
+            $this->IncludeComponentTemplate();
+
+        } catch (\Throwable $e) {
+            ShowError($e->getMessage());
         }
-
-        Loc::loadMessages(__FILE__);
-
-        // Page navigation
-        $gridNav = $grid->GetNavParams();
-        $pager = new PageNavigation('page');
-        $pager->setPageSize($gridNav['nPageSize']);
-        $pager->setRecordCount(/*DoctorService::getCount($gridFilterValues)*/);
-
-        if ($request->offsetExists('page')) {
-            $currentPage = $request->get('page');
-            $pager->setCurrentPage($currentPage > 0 ? $currentPage : $pager->getPageCount());
-        } else {
-            $pager->setCurrentPage(1);
-        }
-
-        /*
-         *  'limit' => $pager->getLimit(),
-            'offset' => $pager->getOffset(),
-         */
-
-		$rows = self::getRows();
-
-        if (!$rows->isSuccess()) {
-            throw new \RuntimeException(implode(', ', $rows));
-        }
-
-        $gridHeaders = [];
-        $gridRows = $rows->getData();
-        $gridSort = [];
-        $gridFilter = [];
-
-		$this->arResult = [
-			'GRID_ID' => self::GRID_ID,
-			'HEADERS' => $gridHeaders,
-			'ROWS' => $gridRows,
-			'SORT' => $gridSort,
-			'FILTER' => $gridFilter,
-			'ENABLE_LIVE_SEARCH' => false,
-			'DISABLE_SEARCH' => true,
-            'PAGINATION' => array(
-                'PAGE_NUM' => $pager->getCurrentPage(),
-                'ENABLE_NEXT_PAGE' => $pager->getCurrentPage() < $pager->getPageCount(),
-                'URL' => $request->getRequestedPage(),
-            ),
-		];
-
-		$this->IncludeComponentTemplate();
 	}
 
-    private function getHeader(): Result
+    private function getColumns(): Result
     {
         $result = new Result;
+        $columns = [];
 
         $rows = OrderTable::getMap();
 
-        dump($rows);
+        foreach ($rows as $key => $field) {
+            $id = $field->getName();
 
-        return $result->setData($rows);
+            switch($field->getName()) {
+                case'COMPANY':
+                case'CLIENT': {
+                    $id = $id . '_NAME';
+                    break;
+                }
+            }
+
+            $columns[] = [
+                'id' => $id,
+                'name' => $field->getTitle(),
+                'default' => true
+            ];
+        }
+
+        return $result->setData($columns);
     }
 
-	private function getRows(): Result
+	private function getRows(int $page = 1, int $limit): Result
 	{
         $result = new Result;
+        $data = [];
+        $offset = $limit * ($page-1);
 
         $rows = OrderTable::query()
             ->setSelect([
@@ -91,13 +107,31 @@ class CustomtabGrid extends CBitrixComponent
                 'CLIENT_NAME' => 'CLIENT.NAME',
             ])
             ->addOrder('ID', 'DESC')
-            ->exec()->fetchAll();
+            ->setLimit($limit)
+            ->setOffset($offset);
 
-        if (empty($rows)) {
-            return $result->addError(Loc::getMessage('OTUS_CUSTOMTAB_ORDERS_NOT_FOUNT'));
+        //print_r($rows->getQuery());
+
+        $rows = $rows->exec();
+
+        foreach ($rows as $row) {
+            //unset($row['UALIAS_0']);
+            //unset($row['UALIAS_1']);
+            $data[] = [
+                'id' => $row['ID'],
+                'columns' => $row
+            ];
         }
 
-        return $result->setData($rows);
+        if (empty($rows)) {
+            return $result->addError(new Error(Loc::getMessage('OTUS_CUSTOMTAB_ORDERS_NOT_FOUNT')));
+        }
+
+        return $result->setData($data);
 	}
 
+    private static function getCount(): int
+    {
+        return OrderTable::getCount();
+    }
 }
