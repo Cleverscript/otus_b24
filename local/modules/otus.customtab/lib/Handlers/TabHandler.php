@@ -39,7 +39,7 @@ class TabHandler
 
             $tabs[] = [
                 'id' => 'otus_customtab',
-                'name' => 'Свой контент',
+                'name' => 'Заказы',
                 'html' => $html
             ];
         }

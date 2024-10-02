@@ -10,21 +10,19 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\UI\PageNavigation;
 use Otus\Customtab\Models\OrderTable;
 
+Loc::loadMessages(__FILE__);
+
 class CustomtabGrid extends CBitrixComponent
 {
     const GRID_ID = 'otus_customtab_grid';
 	public function executeComponent(): void
 	{
         try {
-            $grid = new Bitrix\Main\Grid\Options(self::GRID_ID);
             $request = Context::getCurrent()->getRequest();
 
             if (!Loader::includeModule('otus.customtab')) {
                 throw new \RuntimeException(Loc::getMessage('OTUS_CUSTOMTAB_FAIL_INCLUDE_MODULE'));
             }
-
-            Loc::loadMessages(__FILE__);
-
 
             if (isset($request['order_list'])) {
                 $page = explode('page-', $request['order_list']);
@@ -36,15 +34,19 @@ class CustomtabGrid extends CBitrixComponent
             // Page navigation
             $nav = new \Bitrix\Main\UI\PageNavigation('order_list');
             $nav->allowAllRecords(false)->setPageSize($this->arParams['NUM_PAGE'])->initFromUri();
-            $nav->setRecordCount(self::getCount());
+            $nav->setRecordCount(OrderTable::getCount());
 
+            // Get grid options
+            $gridOptions = new Bitrix\Main\Grid\Options(self::GRID_ID);
+            $navParams = $gridOptions->GetNavParams();
 
             $gridColumns= self::getColumns();
             if (!$gridColumns->isSuccess()) {
                 throw new \RuntimeException(implode(', ', $gridColumns->getErrorMessages()));
             }
 
-            $gridRows = self::getRows($page, $this->arParams['NUM_PAGE']);
+            $limit = $this->arParams['NUM_PAGE']==$navParams['nPageSize']? $this->arParams['NUM_PAGE'] : $navParams['nPageSize'];
+            $gridRows = self::getRows($page, $limit);
 
             if (!$gridRows->isSuccess()) {
                 throw new \RuntimeException(implode(', ', $gridRows->getErrorMessages()));
@@ -55,7 +57,7 @@ class CustomtabGrid extends CBitrixComponent
                 'COLUMNS' => $gridColumns->getData(),
                 'ROWS' => $gridRows->getData(),
                 'NAV_OBJECT' => $nav,
-                'SHOW_ROW_CHECKBOXES' => $this->arParams['SHOW_ROW_CHECKBOXES']=='Y',
+                'SHOW_ROW_CHECKBOXES' => $this->arParams['SHOW_ROW_CHECKBOXES'],
                 'ALLOW_SORT' => true,
             ];
 
@@ -114,24 +116,17 @@ class CustomtabGrid extends CBitrixComponent
 
         $rows = $rows->exec();
 
+        if (empty($rows)) {
+            return $result->addError(new Error(Loc::getMessage('OTUS_CUSTOMTAB_ORDERS_NOT_FOUNT')));
+        }
+
         foreach ($rows as $row) {
-            //unset($row['UALIAS_0']);
-            //unset($row['UALIAS_1']);
             $data[] = [
                 'id' => $row['ID'],
                 'columns' => $row
             ];
         }
 
-        if (empty($rows)) {
-            return $result->addError(new Error(Loc::getMessage('OTUS_CUSTOMTAB_ORDERS_NOT_FOUNT')));
-        }
-
         return $result->setData($data);
 	}
-
-    private static function getCount(): int
-    {
-        return OrderTable::getCount();
-    }
 }
