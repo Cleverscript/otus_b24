@@ -8,8 +8,6 @@
  */
 
 use Bitrix\Main\Localization\Loc;
-use Bitrix\Main\Grid\Panel\Snippet\Onchange;
-use Bitrix\Main\Grid\Panel\Actions;
 
 $this->setFrameMode(true);
 
