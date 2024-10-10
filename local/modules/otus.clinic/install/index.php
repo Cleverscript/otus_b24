@@ -62,6 +62,7 @@ class otus_clinic extends CModule
         $this->eventManager = EventManager::getInstance();
         $this->localPath = $_SERVER["DOCUMENT_ROOT"] . '/local';
         $this->compPath = $_SERVER["DOCUMENT_ROOT"] . '/local/components';
+        $this->jsExtPath = $_SERVER["DOCUMENT_ROOT"] . '/local/js';
 
     }
 
@@ -109,6 +110,7 @@ class otus_clinic extends CModule
 
             return false;
         }
+
         if (!CopyDirFiles(
             $this->GetPath() . '/install/bitrix',
             $_SERVER["DOCUMENT_ROOT"] . '/bitrix/', true)
@@ -124,6 +126,14 @@ class otus_clinic extends CModule
         if (!CopyDirFiles(
             $this->GetPath() . '/install/components',
             $this->compPath, true, true)
+        ) {
+
+            return false;
+        }
+
+        if (!CopyDirFiles(
+            $this->GetPath() . '/install/js',
+            $this->jsExtPath, true, true)
         ) {
 
             return false;
@@ -145,6 +155,14 @@ class otus_clinic extends CModule
     function InstallEvents()
     {
         $eventManager = EventManager::getInstance();
+
+        $eventManager->registerEventHandler(
+            "iblock",
+            "OnIBlockPropertyBuildList",
+            $this->MODULE_ID,
+            '\Otus\Clinic\UserTypes\BookingProcedureLink',
+            "GetUserTypeDescription"
+        );
     }
 
     /**
@@ -154,7 +172,6 @@ class otus_clinic extends CModule
     {
         $eventManager = EventManager::getInstance();
     }
-
 
     // Create entity table in database
     public function InstallDB()

@@ -16,4 +16,5 @@ Loader::registerAutoLoadClasses(null, [
     'Otus\Clinic\Services\ProcedureService' => "/local/modules/{$module_id}/lib/Services/ProcedureService.php",
     'Otus\Clinic\Services\IblockHelper' => "/local/modules/{$module_id}/lib/Services/IblockHelper.php",
     'Otus\Clinic\Utils\BaseUtils' => "/local/modules/{$module_id}/lib/Utils/BaseUtils.php",
+    'Otus\Clinic\UserTypes\BookingProcedureLink' => "/local/modules/{$module_id}/lib/UserTypes/BookingProcedureLink.php",
 ]);
