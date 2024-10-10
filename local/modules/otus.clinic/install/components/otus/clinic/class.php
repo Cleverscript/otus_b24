@@ -35,6 +35,8 @@ class CmpGridComplex extends CBitrixComponent
     {
         try {
 
+            \Bitrix\Main\UI\Extension::load('otus.clinic');
+
             /*debug([
                 $this->arParams['SEF_MODE'],
                 $this->arDefaultUrlTemplates404,
