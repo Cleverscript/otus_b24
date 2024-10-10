@@ -169,8 +169,12 @@ class ClinicList extends CBitrixComponent
                         break;
                     }
                     case self::$referencePropCode: {
-                        foreach ($item[$column] as $procedureName => $procedureColors) {
-                            $value .= "<span class=\"procedure-item\"><b style=\"background-color:{$procedureColors[0]}\"></b>{$procedureName}<span>&nbsp;";
+                        foreach ($item[$column] as $procedureId => $procedure) {
+                            $value = "<a class=\"procedure-item-grid\" data-procedure-id=\"{$procedureId}\" href=\"\">";
+                            $value .= "<span class=\"procedure-item\"><b style=\"background-color:{$procedure['COLOR'][0]}\"></b>";
+                            $value .= "{$procedure['NAME']}<span></a>&nbsp;";
+
+                            //dump($value);
                         }
 
                         break;

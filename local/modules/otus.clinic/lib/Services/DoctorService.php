@@ -68,11 +68,14 @@ class DoctorService
                 } else {
                     // Если св-во с кодом св-ва указанного для связи инфоблоков
                     foreach ($doctor->get($property) as $procedure) {
+                        $procedureId = $procedure->getElement()->getId();
                         $procedureName = $procedure->getElement()->getName();
                         $colors = $procedure->getElement()->getColor();
 
+                        $arData[$doctor->getId()][$property][$procedureId]['NAME'] = $procedureName;
+
                         foreach ($colors as $color) {
-                            $arData[$doctor->getId()][$property][$procedureName][] = $color->getValue();
+                            $arData[$doctor->getId()][$property][$procedureId]['COLOR'][] = $color->getValue();
                         }
                     }
                 }

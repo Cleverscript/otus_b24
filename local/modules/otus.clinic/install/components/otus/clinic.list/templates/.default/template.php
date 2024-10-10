@@ -31,5 +31,5 @@ $APPLICATION->IncludeComponent(
         'PAGINATION' => $arResult['PAGINATION'],
 	],
 	$this->getComponent(),
-	['HIDE_ICONS' => 'Y',]
+	['HIDE_ICONS' => 'Y']
 );
