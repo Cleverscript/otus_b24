@@ -1,53 +1,80 @@
 <?php
+
 namespace Otus\Customtab\Handlers;
 
+use Bitrix\Main\Loader;
 use Bitrix\Main\Event;
 use Bitrix\Main\EventResult;
 
+Loader::includeModule('crm');
+
 class TabHandler
 {
-    public static function updateTabs(Event $event): EventResult
+    public static function addTabs(Event $event): EventResult
     {
+        $entityId = $event->getParameter('entityID');
         $entityTypeID = $event->getParameter('entityTypeID');
         $tabs = $event->getParameter('tabs');
 
-        if ($entityTypeID === \CCrmOwnerType::Deal) {
+        $canUpdateDeal = \CCrmDeal::CheckUpdatePermission(
+            $entityId,
+            \CCrmPerms::GetCurrentUserPermissions()
+        );
 
-            /*$component = new \Bitrix\Main\Engine\Response\Component(
-                'otus:otus.customtab_grid',
-                '',
-                ['SET_PAGE_TITLE' => 'N']
-            );*/
-
-            global $APPLICATION;
-
-            ob_start();
-            $APPLICATION->IncludeComponent(
-                "otus:otus.customtab_grid",
-                '',
-                [
-                    "SET_PAGE_TITLE" => "N",
-                    "COMPONENT_TEMPLATE" => ".default",
-                    "SHOW_ROW_CHECKBOXES" => "Y",
-                    "NUM_PAGE" => "5",
-                    "CACHE_TYPE" => "A",
-                    "CACHE_TIME" => "86400"
-                ]
+        if ($canUpdateDeal) {
+            $tabs = array_merge(
+                $tabs,
+                match (true) {
+                    $entityTypeID === \CCrmOwnerType::Deal => self::addDealTabs(),
+                    $entityTypeID === \CCrmOwnerType::Lead => self::addLeadTabs(),
+                    $entityTypeID === \CCrmOwnerType::Company => self::addCompanyTabs(),
+                    $entityTypeID === \CCrmOwnerType::Contact => self::addContactTabs(),
+                }
             );
-            $html = ob_get_contents();
-            ob_end_clean();
-
-            $tabs[] = [
-                'id' => 'otus_customtab',
-                'name' => 'Заказы',
-                'html' => $html
-            ];
         }
-
-        //dump($tabs);
 
         return new EventResult(EventResult::SUCCESS, [
             'tabs' => $tabs,
         ]);
+    }
+
+    private static function addDealTabs(): array
+    {
+        $tabs[] = [
+            'id' => 'otus_customtab_deal',
+            'name' => 'Заказы',
+            'enabled' => true,
+            'loader' => [
+                'serviceUrl' => '/local/components/otus/otus.customtab_grid/lazyload.ajax.php?&site=' . \SITE_ID . '&' . \bitrix_sessid_get(),
+                'componentData' => [
+                    'template' => '',
+                    'params' => [
+                        "SET_PAGE_TITLE" => "N",
+                        "COMPONENT_TEMPLATE" => ".default",
+                        "SHOW_ROW_CHECKBOXES" => "Y",
+                        "NUM_PAGE" => "5",
+                        "CACHE_TYPE" => "A",
+                        "CACHE_TIME" => "86400"
+                    ]
+                ]
+            ]
+        ];
+
+        return $tabs;
+    }
+
+    private static function addLeadTabs(): array
+    {
+        return [];
+    }
+
+    private static function addCompanyTabs(): array
+    {
+        return [];
+    }
+
+    private static function addContactTabs(): array
+    {
+        return [];
     }
 }

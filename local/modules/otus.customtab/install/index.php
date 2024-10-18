@@ -152,7 +152,7 @@ class otus_customtab extends CModule
             'onEntityDetailsTabsInitialized',
             $this->MODULE_ID,
             '\\Otus\\Customtab\\Handlers\\TabHandler',
-            'updateTabs'
+            'addTabs'
         );
     }
 
