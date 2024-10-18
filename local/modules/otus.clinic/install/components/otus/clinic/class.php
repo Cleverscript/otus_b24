@@ -94,10 +94,10 @@ class CmpGridComplex extends CBitrixComponent
             $this->includeComponentTemplate($view);
             
         } catch (\Throwable $e) {
-            echo '<pre>';
             echo "<strong>{$e->getMessage()}</strong><br/><br/>";
-            var_dump($e->getTraceAsString());
             echo '<pre>';
+            print_r($e->getTraceAsString());
+            echo '</pre>';
         }
 	}
 }
