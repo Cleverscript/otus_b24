@@ -32,9 +32,10 @@ class CustomtabGrid extends CBitrixComponent
             }
 
             // Page navigation
+            $totalRowsCount = OrderTable::getCount();
             $nav = new \Bitrix\Main\UI\PageNavigation('order_list');
             $nav->allowAllRecords(false)->setPageSize($this->arParams['NUM_PAGE'])->initFromUri();
-            $nav->setRecordCount(OrderTable::getCount());
+            $nav->setRecordCount($totalRowsCount);
 
             // Get grid options
             $gridOptions = new Bitrix\Main\Grid\Options(self::GRID_ID);
@@ -57,6 +58,7 @@ class CustomtabGrid extends CBitrixComponent
                 'COLUMNS' => $gridColumns->getData(),
                 'ROWS' => $gridRows->getData(),
                 'NAV_OBJECT' => $nav,
+                'TOTAL_ROWS_COUNT' => $totalRowsCount,
                 'SHOW_ROW_CHECKBOXES' => $this->arParams['SHOW_ROW_CHECKBOXES'],
                 'ALLOW_SORT' => true,
             ];

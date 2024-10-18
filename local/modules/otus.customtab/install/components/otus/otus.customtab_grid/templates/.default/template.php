@@ -30,6 +30,7 @@ $APPLICATION->IncludeComponent(
         "SHOW_ROW_CHECKBOXES" => $arResult['SHOW_ROW_CHECKBOXES'],
         "SHOW_SELECTED_COUNTER" => true,
         "SHOW_PAGESIZE" => true,
+        "TOTAL_ROWS_COUNT" => $arResult['TOTAL_ROWS_COUNT'],
         'PAGE_SIZES' => [
             ['NAME' => "5", 'VALUE' => '5'],
             ['NAME' => '10', 'VALUE' => '10'],
