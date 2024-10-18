@@ -113,6 +113,7 @@ class ClinicList extends CBitrixComponent
 			'FILTER' => $gridFilterFields,
 			'ENABLE_LIVE_SEARCH' => false,
 			'DISABLE_SEARCH' => true,
+            'TOTAL_ROWS_COUNT' => DoctorService::getCount(),
             'PAGINATION' => array(
                 'PAGE_NUM' => $pager->getCurrentPage(),
                 'ENABLE_NEXT_PAGE' => $pager->getCurrentPage() < $pager->getPageCount(),

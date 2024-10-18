@@ -132,7 +132,7 @@ class DoctorService
         return $result->setData($arData);
     }
 
-    public static function getCount(array $gridFilterValues)
+    public static function getCount(array $gridFilterValues = [])
     {
         self::$iblockId = (int) Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_DOCTORS');
         $entity = Iblock::wakeUp(self::$iblockId)->getEntityDataClass();
