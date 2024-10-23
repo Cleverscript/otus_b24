@@ -1,0 +1,8 @@
+<?php
+$MESS['OTUS_CRM_ACTIVITI_MAIN_TAB_SETTINGS'] = 'Главные настройки';
+$MESS['OTUS_CRM_ACTIVITI_MAIN_TAB_SETTINGS_TITLE'] = 'Главные настройки';
+$MESS['OTUS_CRM_ACTIVITI_ORDER_IBLOCK'] = 'Инфоблок с заказами';
+$MESS['OTUS_CRM_ACTIVITI_IBLOCK_PROP_INN'] = 'Св-во c ИНН';
+$MESS['OTUS_CRM_ACTIVITI_DADATA_TOKEN'] = 'Токен DaData';
+$MESS['OTUS_CRM_ACTIVITI_DADATA_SECRET'] = 'Секрет DaData';
+$MESS[''] = '';
