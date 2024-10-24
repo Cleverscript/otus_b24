@@ -6,7 +6,7 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Bizproc\Activity\BaseActivity;
 use Bitrix\Bizproc\Activity\PropertiesDialog;
 
-class CrmSearchInnActivity extends BaseActivity
+class СBPTestActivity extends BaseActivity
 {
     // protected static $requiredModules = ["crm"];
 
