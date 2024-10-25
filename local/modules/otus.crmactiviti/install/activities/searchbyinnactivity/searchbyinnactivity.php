@@ -6,7 +6,7 @@ use Bitrix\Main\ErrorCollection;
 use Bitrix\Main\Localization\Loc;
 use Otus\CrmActiviti\Utils\BaseUtils;
 use Otus\CrmActiviti\Services\Dadata;
-use Otus\CrmActiviti\Services\Company;
+use Otus\CrmActiviti\Helpers\CompanyHelper;
 use Bitrix\Bizproc\Activity\BaseActivity;
 use Bitrix\Bizproc\Activity\PropertiesDialog;
 
@@ -50,9 +50,8 @@ class CBPSearchByInnActivity extends BaseActivity
 
         $token = Option::get($this->moduleId, 'OTUS_CRM_ACTIVITI_DADATA_TOKEN');
         $secret = Option::get($this->moduleId, 'OTUS_CRM_ACTIVITI_DADATA_SECRET');
+        $propCompInnCode = Option::get('otus.crmactiviti', 'OTUS_CRM_ACTIVITI_CRM_COMPANY_PROP_UF_INN');
         $orderPropCompanyCode = Option::get($this->moduleId, 'OTUS_CRM_ACTIVITI_IBLOCK_PROP_COMP_CODE');
-
-        // TODO проверка на тип документа
 
         if (!$this->orderId) {
             $errors->setError(
@@ -111,20 +110,21 @@ class CBPSearchByInnActivity extends BaseActivity
             return $errors;
         }
 
-        // TODO проверка что компании еще нет
+        $companyId = CompanyHelper::isExist($this->Inn, $propCompInnCode);
 
-        // Create COMPANY
-        $companyAddResult = Company::addCompany([
-            'TITLE' => $companyName,
-            'UF_INN' => $this->Inn
-        ]);
+        if (!$companyId) {
+            $companyAddResult = CompanyHelper::addCompany([
+                'TITLE' => $companyName,
+                'UF_INN' => $this->Inn
+            ]);
 
-        if (!$companyAddResult->isSuccess()) {
-            $this->log(BaseUtils::extractErrorMessage($companyAddResult));
-            return $errors;
+            if (!$companyAddResult->isSuccess()) {
+                $this->log(BaseUtils::extractErrorMessage($companyAddResult));
+                return $errors;
+            }
+
+            $companyId = (int)$companyAddResult->getData()['ID'];
         }
-
-        $companyId = (int) $companyAddResult->getData()['ID'];
 
         if (!$companyId) {
             $this->log(BaseUtils::extractErrorMessage($companyAddResult));

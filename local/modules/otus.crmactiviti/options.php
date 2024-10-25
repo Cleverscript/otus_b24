@@ -5,6 +5,7 @@ use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\HttpApplication;
 use Otus\CrmActiviti\Helpers\IblockHelper;
+use Otus\CrmActiviti\Helpers\CompanyHelper;
 use Otus\CrmActiviti\Utils\BaseUtils;
 
 $module_id = "otus.crmactiviti";
@@ -33,6 +34,14 @@ if ($orderIblId) {
     $arPropertys = $pops->getData();
 }
 
+$arCompPropertys = [];
+$pops = CompanyHelper::getCompanyProps()->getData();
+if (!empty($pops)) {
+    foreach ($pops as $code) {
+        $arCompPropertys[$code] = $code;
+    }
+}
+
 $arMainPropsTab = [
     "DIV" => "edit1",
     "TAB" => Loc::getMessage("OTUS_CRM_ACTIVITI_MAIN_TAB_SETTINGS"),
@@ -51,6 +60,13 @@ $arMainPropsTab = [
             Loc::getMessage("OTUS_CRM_ACTIVITI_IBLOCK_PROP_COMP_CODE"),
             null,
             ["selectbox", $arPropertys]
+        ],
+
+        [
+            "OTUS_CRM_ACTIVITI_CRM_COMPANY_PROP_UF_INN",
+            Loc::getMessage("OTUS_CRM_ACTIVITI_CRM_COMPANY_PROP_UF_INN"),
+            null,
+            ["selectbox", $arCompPropertys]
         ],
 
         [
