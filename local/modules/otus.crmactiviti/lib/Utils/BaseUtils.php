@@ -25,25 +25,4 @@ class BaseUtils
     {
         return implode('; ', $result->getErrorMessages());
     }
-
-    public static function getFieldKeyByEntityClass(string $class, string $fieldKey): string
-    {
-        if (empty($class)) {
-            throw new \Exception('Class name is empty');
-        }
-
-        $key = mb_strtoupper(str_replace(['Table', '\\'], ['', '_'], $class));
-        $key .= '_' .str_replace('.', '_', $fieldKey);
-
-        return $key;
-    }
-
-    public static function getFieldNameElement(string $name): string
-    {
-        if (empty($name)) {
-            throw new \Exception('Field name is empty');
-        }
-
-        return $name;
-    }
 }

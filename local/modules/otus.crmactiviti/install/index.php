@@ -122,7 +122,14 @@ class otus_crmactiviti extends CModule
 
     function UnInstallFiles()
     {
-        Directory::deleteDirectory($this->activitiesPath . '/crmsearchinnactivity');
+        $activities = [
+            'searchbyinnactivity',
+            'helloworldactivity',
+        ];
+
+        foreach ($activities as $activiti) {
+            Directory::deleteDirectory("{$this->activitiesPath}/{$activiti}");
+        }
     }
 
     function InstallEvents()
