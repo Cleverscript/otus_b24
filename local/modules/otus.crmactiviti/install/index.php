@@ -134,24 +134,12 @@ class otus_crmactiviti extends CModule
 
     function InstallEvents()
     {
-        /*$this->eventManager->registerEventHandler(
-            'main',
-            'OnEpilog',
-            $this->MODULE_ID,
-            '\\Otus\\Customtab\\Handlers\\SidePanelHandler',
-            'handleSidepanelLinks'
-        );*/
+        return true;
     }
 
     function UnInstallEvents()
     {
-        /*$this->eventManager->unRegisterEventHandler(
-            'main',
-            'OnEpilog',
-            $this->MODULE_ID,
-            '\\Otus\\Customtab\\Handlers\\SidePanelHandler',
-            'handleSidepanelLinks'
-        );*/
+        return true;
     }
 
     public function InstallDB()
