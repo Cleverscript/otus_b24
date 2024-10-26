@@ -31,14 +31,14 @@ $orderIblId = Option::get($module_id , 'OTUS_CRM_ACTIVITI_ORDER_IBLOCK');
 if ($orderIblId) {
     $pops = IblockHelper::getIblockProps($orderIblId);
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($pops));
-    $arPropertys = $pops->getData();
+    $arIblockPropertys = $pops->getData();
 }
 
 $arCompPropertys = [];
 $pops = CompanyHelper::getCompanyProps()->getData();
 if (!empty($pops)) {
-    foreach ($pops as $code) {
-        $arCompPropertys[$code] = $code;
+    foreach ($pops as $pop) {
+        $arCompPropertys[$pop['CODE']] = "[{$pop['CODE']}] {$pop['NAME']}";
     }
 }
 
@@ -59,7 +59,7 @@ $arMainPropsTab = [
             "OTUS_CRM_ACTIVITI_IBLOCK_PROP_COMP_CODE",
             Loc::getMessage("OTUS_CRM_ACTIVITI_IBLOCK_PROP_COMP_CODE"),
             null,
-            ["selectbox", $arPropertys]
+            ["selectbox", $arIblockPropertys]
         ],
 
         [

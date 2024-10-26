@@ -111,6 +111,7 @@ class CBPSearchByInnActivity extends BaseActivity
         }
 
         $companyId = CompanyHelper::isExist($this->Inn, $propCompInnCode);
+        $messLangCode = 'SEARCHBYINN_ACTIVITY_COMP_USE';
 
         if (!$companyId) {
             $companyAddResult = CompanyHelper::addCompany([
@@ -124,6 +125,7 @@ class CBPSearchByInnActivity extends BaseActivity
             }
 
             $companyId = (int)$companyAddResult->getData()['ID'];
+            $messLangCode = 'SEARCHBYINN_ACTIVITY_COMP_CREATE_SUCCESS';
         }
 
         if (!$companyId) {
@@ -137,7 +139,7 @@ class CBPSearchByInnActivity extends BaseActivity
         $documentService = CBPRuntime::GetRuntime(true)->getDocumentService();
 
         $this->preparedProperties['Text'] = Loc::getMessage(
-            'SEARCHBYINN_ACTIVITY_COMP_CREATE_SUCCESS',
+            $messLangCode,
             [
                 '#ID#' => $companyId,
                 '#NAME#' => $companyName,

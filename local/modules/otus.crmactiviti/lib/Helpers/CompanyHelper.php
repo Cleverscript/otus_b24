@@ -5,6 +5,8 @@ namespace Otus\CrmActiviti\Helpers;
 use Bitrix\Main\Error;
 use Bitrix\Main\Result;
 use Bitrix\Crm\CompanyTable;
+use Bitrix\Main\UserFieldTable;
+use Bitrix\Main\UserFieldLangTable;
 use Bitrix\Main\Localization\Loc;
 
 class CompanyHelper
@@ -34,13 +36,31 @@ class CompanyHelper
 
     public static function getCompanyProps(): Result
     {
+        $data = [];
         $result = new Result;
 
-        global $USER_FIELD_MANAGER;
+        $entityId = 'CRM_COMPANY';
+        $dbUserFields = UserFieldTable::getList([
+            'filter' => ['ENTITY_ID' => $entityId]
+        ]);
 
-        return $result->setData(
-            array_keys($USER_FIELD_MANAGER->GetUserFields("CRM_COMPANY"))
-        );
+        while ($arUF = $dbUserFields->fetch()) {
+            $dbUFLang = UserFieldLangTable::getList([
+                'filter' => ['USER_FIELD_ID' => $arUF['ID']]
+            ]);
+
+            while ($arUFLang = $dbUFLang->fetch()) {
+                if (LANGUAGE_ID == $arUFLang['LANGUAGE_ID']) {
+                    $data[$arUF['ID']] = [
+                        'ID' => $arUF['ID'],
+                        'CODE' => $arUF['FIELD_NAME'],
+                        'NAME' => $arUFLang['EDIT_FORM_LABEL']
+                    ];
+                }
+            }
+        }
+
+        return $result->setData($data);
     }
 
     public static function isExist(int $inn, string $propCode): ?int
