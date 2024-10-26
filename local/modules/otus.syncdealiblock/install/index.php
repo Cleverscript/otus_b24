@@ -30,7 +30,6 @@ class otus_syncdealiblock extends CModule
     public $eventManager;
 
     private string $localPath;
-    private string $activitiesPath;
 
     function __construct()
     {
@@ -56,8 +55,6 @@ class otus_syncdealiblock extends CModule
 
         $this->eventManager = EventManager::getInstance();
         $this->localPath = $_SERVER["DOCUMENT_ROOT"] . '/local';
-        $this->activitiesPath = $_SERVER["DOCUMENT_ROOT"] . '/local/activities/custom';
-
     }
 
     public function isVersionD7()
@@ -106,52 +103,148 @@ class otus_syncdealiblock extends CModule
             return false;
         }
 
-        if (!Directory::isDirectoryExists($this->activitiesPath)) {
-            Directory::createDirectory($this->activitiesPath);
-        }
-
-        if (!CopyDirFiles(
-            $this->GetPath() . '/install/activities',
-            $this->activitiesPath, true, true)
-        ) {
-            return false;
-        }
-
         return true;
     }
 
     function UnInstallFiles()
     {
-        $activities = [
-            'searchbyinnactivity',
-            'helloworldactivity',
-        ];
-
-        foreach ($activities as $activiti) {
-            Directory::deleteDirectory("{$this->activitiesPath}/{$activiti}");
-        }
+        return true;
     }
 
     function InstallEvents()
     {
-        /*$this->eventManager->registerEventHandler(
-            'main',
-            'OnEpilog',
+        $this->eventManager->registerEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementAdd',
             $this->MODULE_ID,
-            '\\Otus\\Customtab\\Handlers\\SidePanelHandler',
-            'handleSidepanelLinks'
-        );*/
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'beforeAdd'
+        );
+        $this->eventManager->registerEventHandler(
+            'iblock',
+            'OnAfterIBlockElementAdd',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'afterAdd'
+        );
+        $this->eventManager->registerEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementUpdate',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'beforeUpdate'
+        );
+        $this->eventManager->registerEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementDelete',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'beforeDelete'
+        );
+        $this->eventManager->registerEventHandler(
+            'iblock',
+            'OnAfterIBlockElementDelete',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'afterDelete'
+        );
+
+        $this->eventManager->registerEventHandler(
+            'crm',
+            'OnAfterCrmDealAdd',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            'afterAdd'
+        );
+        $this->eventManager->registerEventHandler(
+            'crm',
+            'OnBeforeCrmDealUpdate',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            'beforeUpdate'
+        );
+        $this->eventManager->registerEventHandler(
+            'crm',
+            'OnBeforeCrmDealDelete',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            'beforeDelete'
+        );
+        $this->eventManager->registerEventHandler(
+            'crm',
+            'OnAfterCrmDealDelete',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            'afterDelete'
+        );
     }
 
     function UnInstallEvents()
     {
-        /*$this->eventManager->unRegisterEventHandler(
-            'main',
-            'OnEpilog',
+        $this->eventManager->unRegisterEventHandler(
+                'iblock',
+                'OnBeforeIBlockElementAdd',
+                $this->MODULE_ID,
+                '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+                'beforeAdd'
+            );
+        $this->eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnAfterIBlockElementAdd',
             $this->MODULE_ID,
-            '\\Otus\\Customtab\\Handlers\\SidePanelHandler',
-            'handleSidepanelLinks'
-        );*/
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'afterAdd'
+        );
+        $this->eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementUpdate',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'beforeUpdate'
+        );
+        $this->eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementDelete',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'beforeDelete'
+        );
+        $this->eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnAfterIBlockElementDelete',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            'afterDelete'
+        );
+
+        $this->eventManager->unRegisterEventHandler(
+            'crm',
+            'OnAfterCrmDealAdd',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            'afterAdd'
+        );
+        $this->eventManager->unRegisterEventHandler(
+            'crm',
+            'OnBeforeCrmDealUpdate',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            'beforeUpdate'
+        );
+        $this->eventManager->unRegisterEventHandler(
+            'crm',
+            'OnBeforeCrmDealDelete',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            'beforeDelete'
+        );
+        $this->eventManager->unRegisterEventHandler(
+            'crm',
+            'OnAfterCrmDealDelete',
+            $this->MODULE_ID,
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            'afterDelete'
+        );
     }
 
     public function InstallDB()
@@ -184,7 +277,7 @@ class otus_syncdealiblock extends CModule
             return true;
 
         } else {
-            $APPLICATION->ThrowException(Loc::getMessage('OTUS_CRM_SEARCH_INN_ACTIVITI_INSTALL_ERROR_VERSION'));
+            $APPLICATION->ThrowException(Loc::getMessage('OTUS_SYNCDEALIBLOCK_INSTALL_ERROR_VERSION'));
         }
     }
 

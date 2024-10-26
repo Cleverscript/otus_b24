@@ -8,18 +8,18 @@ use Otus\SyncDealIblock\Helpers\IblockHelper;
 use Otus\SyncDealIblock\Helpers\DealHelper;
 use Otus\SyncDealIblock\Utils\BaseUtils;
 
-$module_id = "otus.syncdealiblock";
+$moduleId = 'otus.syncdealiblock';
 
 IncludeModuleLangFile($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/main/options.php');
 IncludeModuleLangFile(__FILE__);
 
-Loader::includeModule($module_id);
+Loader::includeModule($moduleId);
 
 global $APPLICATION;
 
 $request = HttpApplication::getInstance()->getContext()->getRequest();
 
-$defaultOptions = Option::getDefaults($module_id);
+$defaultOptions = Option::getDefaults($moduleId);
 
 $iblocks = IblockHelper::getIblocks();
 
@@ -28,7 +28,7 @@ if (!$iblocks->isSuccess()) {
 }
 
 $arIblockPropertys = [];
-$orderIblId = Option::get($module_id , 'OTUS_SYNCDEALIBLOCK_ORDER_IBLOCK');
+$orderIblId = Option::get($moduleId , 'OTUS_SYNCDEALIBLOCK_ORDER_IBLOCK');
 if ($orderIblId) {
     $pops = IblockHelper::getIblockProps($orderIblId);
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($pops));
@@ -102,7 +102,7 @@ $aTabs = [
 if ($request->isPost() && $request["save"] && check_bitrix_sessid()) {
     foreach ($aTabs as $aTab) {
         if (!empty($aTab['OPTIONS'])) {
-            __AdmSettingsSaveOptions($module_id, $aTab["OPTIONS"]);
+            __AdmSettingsSaveOptions($moduleId, $aTab["OPTIONS"]);
         }
     }
 }
@@ -113,19 +113,19 @@ if ($request->isPost() && $request["save"] && check_bitrix_sessid()) {
 $tabControl = new CAdminTabControl("tabControl", $aTabs);
 ?>
 <?php $tabControl->Begin(); ?>
-<form method="post" action="<?=$APPLICATION->GetCurPage();?>?mid=<?=htmlspecialcharsbx($request["mid"]);?>&amp;lang=<?=LANGUAGE_ID?>" name="<?=$module_id;?>">
+<form method="post" action="<?=$APPLICATION->GetCurPage();?>?mid=<?=htmlspecialcharsbx($request["mid"]);?>&amp;lang=<?=LANGUAGE_ID?>" name="<?=$moduleId;?>">
     <?php $tabControl->BeginNextTab(); ?>
 
     <?php
     foreach ($aTabs as $aTab) {
         if(is_array($aTab['OPTIONS'])) {
-            __AdmSettingsDrawList($module_id, $aTab['OPTIONS']);
+            __AdmSettingsDrawList($moduleId, $aTab['OPTIONS']);
             $tabControl->BeginNextTab();
         }
     }
     ?>
 
-    <?php require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/admin/group_rights.php"); ?>
+    <?php //require_once $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/admin/group_rights.php"; ?>
 
     <?php $tabControl->Buttons(array('btnApply' => false, 'btnCancel' => false, 'btnSaveAndAdd' => false)); ?>
 
