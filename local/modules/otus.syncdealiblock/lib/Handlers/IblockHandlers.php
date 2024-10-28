@@ -2,6 +2,7 @@
 
 namespace Otus\SyncDealIblock\Handlers;
 
+use Bitrix\Iblock\Iblock;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Otus\SyncDealIblock\Helpers\IblockHelper;
@@ -107,9 +108,50 @@ class IblockHandlers
     {
         pLog([__METHOD__ => $arFields]);
 
+        global $APPLICATION;
+
+        $dealId = null;
+        $dealUpdFields = [];
+        $elementId = $arFields['ID'];
+
         $iblockId = Option::get(self::$moduleId, self::$requireProps['IBLOCK_ID']);
         $sumPropId = Option::get(self::$moduleId, self::$requireProps['SUM']);
+        $dealPropId = Option::get(self::$moduleId, self::$requireProps['DEAL']);
         $assignedPropId = Option::get(self::$moduleId, self::$requireProps['ASSIGNED']);
+
+        $propsCodes = IblockHelper::getIblockProperties($iblockId, [$dealPropId]);
+
+        if (empty($propsCodes)) {
+            $APPLICATION->throwException(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBL_ELEM_CODE_DEAL_IS_EMPTY')
+            );
+
+            return false;
+        }
+
+        $elementObj = $object = Iblock::wakeUp($iblockId)
+            ->getEntityDataClass()::query()
+            ->where('ID', $elementId)
+            ->setSelect(array_values($propsCodes))
+            ->fetchObject();
+
+        if (!is_object($elementObj)) {
+            $APPLICATION->throwException(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBLOCK_ELEM_EMPTY')
+            );
+
+            return false;
+        }
+
+        $dealId = $elementObj?->get(current($propsCodes))?->getValue();
+
+        if (!intval($dealId)) {
+            $APPLICATION->throwException(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_DEAL_ID_IS_EMPTY')
+            );
+
+            return false;
+        }
 
         $diffVals = IblockHelper::diffChangePropsVals(
             $iblockId,
@@ -118,7 +160,24 @@ class IblockHandlers
         );
 
         if (!empty($diffVals)) {
+            foreach ($diffVals as $propId => $prop) {
+                switch ($propId) {
+                    case $sumPropId: {
+                        $dealUpdFields['OPPORTUNITY'] = $prop['VALUE'];
+                        break;
+                    }
+                    case $assignedPropId: {
+                        $dealUpdFields['ASSIGNED_BY_ID'] = $prop['VALUE'];
+                        break;
+                    }
+                    default : {
+                        break;
+                    }
+                }
+            }
             pLog([__METHOD__ => $diffVals]);
+
+            $res = (new \CCrmDeal)->Update($dealId, $dealUpdFields, true, true, ['DISABLE_USER_FIELD_CHECK' => true]);
         }
     }
 

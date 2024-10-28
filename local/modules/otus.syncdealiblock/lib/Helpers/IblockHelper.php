@@ -77,9 +77,9 @@ class IblockHelper
         return $val;
     }
 
-    public static function diffChangePropsVals(int $iblockId, array $propsIds, array $arFields)
+    public static function getIblockProperties(int $iblockId, array $propsIds): array
     {
-        $elementId = $arFields['ID'];
+        $result = [];
 
         $rows = PropertyTable::getList(
             [
@@ -88,30 +88,40 @@ class IblockHelper
             ]
         )->fetchAll();
 
-        $propsCodes = [];
-        $propsCodeSelect = [];
-
-        pLog($propsIds, '__diffChangePropsVals.log');
-
         foreach ($rows as $row) {
             if (!in_array($row['ID'], $propsIds)) continue;
-
-            pLog($row['ID'], '__diffChangePropsVals.log');
-
-            $propsCodes[$row['ID']] = $row['CODE'];
-            $propsCodeSelect[] = $row['CODE'];
+            $result[$row['ID']] = $row['CODE'];
         }
 
-        pLog($propsCodeSelect, '__diffChangePropsVals.log');
-
         unset($rows);
+
+        return $result;
+    }
+
+    public static function diffChangePropsVals(int $iblockId, array $propsIds, array $arFields): array
+    {
+        $result = [];
+        $elementId = $arFields['ID'];
+
+        $propsCodes = self::getIblockProperties($iblockId, $propsIds);
 
         $elementObj = $object = Iblock::wakeUp($iblockId)
             ->getEntityDataClass()::query()
             ->where('ID', $elementId)
-            ->setSelect($propsCodeSelect)
+            ->setSelect(array_values($propsCodes))
             ->fetchObject();
 
-        pLog($elementObj?->get('SUM')?->getValue(), '__diffChangePropsVals.log');
+
+        foreach ($propsCodes as $propId => $code) {
+            $newVal = self::getElementPropValue($propId, $arFields);
+
+            if ($elementObj?->get($code)?->getValue() === $newVal) continue;
+
+            $result[$propId] = ['CODE' => $code,  'VALUE' => $newVal];
+        }
+
+        unset($elementObj);
+
+        return $result;
     }
 }
