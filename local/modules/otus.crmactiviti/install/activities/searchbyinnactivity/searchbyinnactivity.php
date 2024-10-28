@@ -50,7 +50,7 @@ class CBPSearchByInnActivity extends BaseActivity
 
         $token = Option::get($this->moduleId, 'OTUS_CRM_ACTIVITI_DADATA_TOKEN');
         $secret = Option::get($this->moduleId, 'OTUS_CRM_ACTIVITI_DADATA_SECRET');
-        $propCompInnCode = Option::get('otus.crmactiviti', 'OTUS_CRM_ACTIVITI_CRM_COMPANY_PROP_UF_INN');
+        $propCompInnCode = Option::get($this->moduleId, 'OTUS_CRM_ACTIVITI_CRM_COMPANY_PROP_UF_INN');
         $orderPropCompanyCode = Option::get($this->moduleId, 'OTUS_CRM_ACTIVITI_IBLOCK_PROP_COMP_CODE');
 
         if (!$this->orderId) {
@@ -80,6 +80,22 @@ class CBPSearchByInnActivity extends BaseActivity
         if (empty($secret)) {
             $errors->setError(
                 new \Bitrix\Main\Error(Local::getMessage('SEARCHBYINN_ACTIVITY_MOD_DADATA_SECRET_EMPTY'))
+            );
+
+            return $errors;
+        }
+
+        if (empty($propCompInnCode)) {
+            $errors->setError(
+                new \Bitrix\Main\Error(Local::getMessage('SEARCHBYINN_ACTIVITY_MOD_COMP_INN_EMPTY'))
+            );
+
+            return $errors;
+        }
+
+        if (empty($orderPropCompanyCode)) {
+            $errors->setError(
+                new \Bitrix\Main\Error(Local::getMessage('SEARCHBYINN_ACTIVITY_MOD_COMP_EMPTY'))
             );
 
             return $errors;
