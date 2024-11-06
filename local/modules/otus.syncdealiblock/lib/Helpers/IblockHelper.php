@@ -7,6 +7,7 @@ use Bitrix\Main\Result;
 use Bitrix\Iblock\Iblock;
 use Bitrix\Iblock\IblockTable;
 use \Bitrix\Iblock\PropertyTable;
+use Bitrix\Main\Localization\Loc;
 
 class IblockHelper
 {
@@ -123,5 +124,64 @@ class IblockHelper
         unset($elementObj);
 
         return $result;
+    }
+
+    public static function getDealIdFromOrder(int $iblockId, int $elementId, int $dealPropId): Result
+    {
+        $result = new Result;
+
+        if (!$iblockId) {
+            $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBLOCK_EMPTY')
+            ));
+        }
+
+        if (!$elementId) {
+            $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_ORDER_ID_EMPTY')
+            ));
+        }
+
+        if (!$dealPropId) {
+            $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_DEAL_PROP_ID_EMPTY')
+            ));
+        }
+
+        if (!$result->isSuccess()) {
+            return $result;
+        }
+
+        $propsCodes = IblockHelper::getIblockProperties($iblockId, [$dealPropId]);
+
+        if (empty($propsCodes)) {
+            return $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBL_ELEM_CODE_DEAL_IS_EMPTY')
+            ));
+        }
+
+        pLog([$elementId, $propsCodes]);
+
+        $elementObj = Iblock::wakeUp($iblockId)
+            ->getEntityDataClass()::query()
+            ->where('ID', $elementId)
+            ->setSelect(array_values($propsCodes))
+            ->fetchObject();
+
+        if (!is_object($elementObj)) {
+            return $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBLOCK_ELEM_EMPTY')
+            ));
+        }
+
+        $dealId = $elementObj?->get(current($propsCodes))?->getValue();
+
+        if (!$dealId) {
+            return $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBLOCK_ELEM_DEAL_ID_EMPTY', ['#ORDER_ID#' => $elementId])
+            ));
+        }
+
+        return $result->setData([$dealId]);
     }
 }

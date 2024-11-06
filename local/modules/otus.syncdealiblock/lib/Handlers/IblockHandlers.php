@@ -2,9 +2,10 @@
 
 namespace Otus\SyncDealIblock\Handlers;
 
-use Bitrix\Iblock\Iblock;
+use Bitrix\Crm\DealTable;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
+use Otus\SyncDealIblock\Utils\BaseUtils;
 use Otus\SyncDealIblock\Helpers\IblockHelper;
 use Otus\SyncDealIblock\Exceptions\ModuleException;
 
@@ -16,13 +17,12 @@ class IblockHandlers
         'IBLOCK_ID' => 'OTUS_SYNCDEALIBLOCK_ORDER_IBLOCK',
         'DEAL' => 'OTUS_SYNCDEALIBLOCK_IBLOCK_PROP_DEAL_CODE',
         'SUM' => 'OTUS_SYNCDEALIBLOCK_IBLOCK_PROP_SUM_CODE',
-        'ASSIGNED' => 'OTUS_SYNCDEALIBLOCK_IBLOCK_PROP_ASSIGNED_CODE'
+        'ASSIGNED' => 'OTUS_SYNCDEALIBLOCK_IBLOCK_PROP_ASSIGNED_CODE',
+        'ORDER' => 'OTUS_SYNCDEALIBLOCK_CRM_DEAL_PROP_UF_ORDER'
     ];
 
     public static function beforeAdd(&$arFields)
     {
-        pLog([__METHOD__ => $arFields]);
-
         foreach (self::$requireProps as $key => $code) {
             if (Option::get(self::$moduleId, $code) == false) {
 
@@ -35,21 +35,26 @@ class IblockHandlers
 
     public static function afterAdd(&$arFields)
     {
-        pLog([__METHOD__ => $arFields]);
-
         $sumPropId = Option::get(self::$moduleId, self::$requireProps['SUM']);
-        $dealPropId = Option::get(self::$moduleId, self::$requireProps['DEAL']);
-        $assignedPropId = Option::get(self::$moduleId, self::$requireProps['ASSIGNED']);
 
         if (!$sumPropId) {
             return false;
         }
 
+        $dealPropId = Option::get(self::$moduleId, self::$requireProps['DEAL']);
+
         if (!$dealPropId) {
             return false;
         }
 
+        $assignedPropId = Option::get(self::$moduleId, self::$requireProps['ASSIGNED']);
+
         if (!$assignedPropId) {
+            return false;
+        }
+
+        $orderPropDealCode = Option::get(self::$moduleId, self::$requireProps['ORDER']);
+        if (empty($orderPropDealCode)) {
             return false;
         }
 
@@ -70,6 +75,7 @@ class IblockHandlers
             'OPPORTUNITY' => $sumDeal,
             'ASSIGNED_BY_ID' => $assignedDeal,
             'STAGE_ID' => 'NEW',
+            $orderPropDealCode => $arFields['ID']
         ];
 
         $deal = new \CCrmDeal;
@@ -86,6 +92,12 @@ class IblockHandlers
         if ($dealId) {
             $deal->Update($dealId, $arFieldsDeal, true, true, []);
 
+            \CIBlockElement::SetPropertyValuesEx(
+                $arFields['ID'],
+                $arFields['IBLOCK_ID'],
+                [$dealPropId => $dealId]
+            );
+
             (new \CIBlockElement)->Update(
                 $arFields['ID'],
                 [
@@ -95,19 +107,11 @@ class IblockHandlers
                     ])
                 ]
             );
-
-            \CIBlockElement::SetPropertyValuesEx(
-                $arFields['ID'],
-                $arFields['IBLOCK_ID'],
-                [$dealPropId => $dealId]
-            );
         }
     }
 
     public static function beforeUpdate(&$arFields)
     {
-        pLog([__METHOD__ => $arFields]);
-
         global $APPLICATION;
 
         $dealId = null;
@@ -129,25 +133,11 @@ class IblockHandlers
             return false;
         }
 
-        $elementObj = $object = Iblock::wakeUp($iblockId)
-            ->getEntityDataClass()::query()
-            ->where('ID', $elementId)
-            ->setSelect(array_values($propsCodes))
-            ->fetchObject();
+        $dealId = IblockHelper::getDealIdFromOrder($iblockId, $elementId, $dealPropId);
 
-        if (!is_object($elementObj)) {
+        if (!$dealId->isSuccess()) {
             $APPLICATION->throwException(
-                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBLOCK_ELEM_EMPTY')
-            );
-
-            return false;
-        }
-
-        $dealId = $elementObj?->get(current($propsCodes))?->getValue();
-
-        if (!intval($dealId)) {
-            $APPLICATION->throwException(
-                Loc::getMessage('OTUS_SYNCDEALIBLOCK_DEAL_ID_IS_EMPTY')
+                BaseUtils::extractErrorMessage($dealId->getErrorMessages())
             );
 
             return false;
@@ -175,19 +165,71 @@ class IblockHandlers
                     }
                 }
             }
-            pLog([__METHOD__ => $diffVals]);
 
-            $res = (new \CCrmDeal)->Update($dealId, $dealUpdFields, true, true, ['DISABLE_USER_FIELD_CHECK' => true]);
+            (new \CCrmDeal)->Update(
+                $dealId,
+                $dealUpdFields,
+                true,
+                true,
+                ['DISABLE_USER_FIELD_CHECK' => true]
+            );
         }
     }
 
-    public static function beforeDelete(&$arFields)
+    public static function beforeDelete($id)
     {
-        pLog([__METHOD__ => $arFields]);
+        global $APPLICATION;
+
+        $iblockId = Option::get(self::$moduleId, self::$requireProps['IBLOCK_ID']);
+        $dealPropId = Option::get(self::$moduleId, self::$requireProps['DEAL']);
+
+        $dealId = IblockHelper::getDealIdFromOrder($iblockId, $id, $dealPropId);
+
+        if (!$dealId->isSuccess()) {
+            $APPLICATION->throwException(
+                BaseUtils::extractErrorMessage($dealId->getErrorMessages())
+            );
+
+            return false;
+        }
+
+        $dealId = current($dealId->getData());
+
+        if (!(new \CCrmDeal)->Exists($dealId)) {
+            return true;
+        }
+
+        $dealInfo = DealTable::query()
+            ->where('ID', $dealId)
+            ->setSelect(['CLOSED'])
+            ->exec()->fetch();
+
+        if ($dealInfo['CLOSED'] != 'Y') {
+            $APPLICATION->throwException(
+                Loc::getMessage(
+                    'OTUS_SYNCDEALIBLOCK_ORDER_DELETE_DEAL_CLOSED_FAIL',
+                    ['#DEAL_ID#' => $dealId, '#ORDER_ID#' => $id]
+                )
+            );
+
+            return false;
+        }
     }
 
-    public static function afterDelete(&$arFields)
+    public static function afterDelete($arFields)
     {
-        pLog([__METHOD__ => $arFields]);
+        $orderPropDealCode = Option::get(self::$moduleId, self::$requireProps['ORDER']);
+        if (empty($orderPropDealCode)) {
+            return false;
+        }
+
+        $dealId = DealTable::query()
+            ->where($orderPropDealCode, $arFields['ID'])
+            ->setSelect(['ID'])
+            ->exec()->fetch()['ID'];
+
+        if ($dealId) {
+            (new \CCrmDeal)->Delete($dealId);
+        }
     }
 }
