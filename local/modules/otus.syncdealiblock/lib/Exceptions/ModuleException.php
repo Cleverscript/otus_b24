@@ -3,10 +3,11 @@
 namespace Otus\SyncDealIblock\Exceptions;
 
 use Bitrix\Main\Localization\Loc;
+use Otus\SyncDealiblock\Traits\ModuleTrait;
 
 class ModuleException
 {
-    protected static $moduleId = 'otus.syncdealiblock';
+    use ModuleTrait;
 
     public static function exceptionModuleOption(string $code, array $requireProps): void
     {

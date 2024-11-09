@@ -7,6 +7,6 @@ $module_id = "otus.syncdealiblock";
 $defaultOptions = Option::getDefaults($module_id);
 
 Loader::registerAutoLoadClasses(null, [
-    //'Otus\CrmActiviti\Helpers\IblockHelper' => "/local/modules/{$module_id}/lib/Helpers/IblockHelper.php",
-    //'Otus\CrmActiviti\Utils\BaseUtils' => "/local/modules/{$module_id}/lib/Utils/BaseUtils.php",
+    //'Otus\SyncDealiblock\Traits\ModuleTrait' => "/local/modules/{$module_id}/lib/Traits/ModuleTrait.php",
+    //'Otus\SyncDealiblock\Traits\HandlerTrait' => "/local/modules/{$module_id}/lib/Traits/HandlerTrait.php",
 ]);

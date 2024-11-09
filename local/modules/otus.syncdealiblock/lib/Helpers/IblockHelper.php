@@ -106,12 +106,11 @@ class IblockHelper
 
         $propsCodes = self::getIblockProperties($iblockId, $propsIds);
 
-        $elementObj = $object = Iblock::wakeUp($iblockId)
+        $elementObj = Iblock::wakeUp($iblockId)
             ->getEntityDataClass()::query()
             ->where('ID', $elementId)
             ->setSelect(array_values($propsCodes))
             ->fetchObject();
-
 
         foreach ($propsCodes as $propId => $code) {
             $newVal = self::getElementPropValue($propId, $arFields);
@@ -160,8 +159,6 @@ class IblockHelper
             ));
         }
 
-        pLog([$elementId, $propsCodes]);
-
         $elementObj = Iblock::wakeUp($iblockId)
             ->getEntityDataClass()::query()
             ->where('ID', $elementId)
@@ -183,5 +180,62 @@ class IblockHelper
         }
 
         return $result->setData([$dealId]);
+    }
+
+    public static function getOrderIdFromDeal(int $iblockId, int $dealId, int $dealPropId): Result
+    {
+        $result = new Result;
+
+        if (!$iblockId) {
+            $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBLOCK_EMPTY')
+            ));
+        }
+
+        if (!$dealId) {
+            $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_DEAL_ID_EMPTY')
+            ));
+        }
+
+        if (!$dealPropId) {
+            $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_DEAL_PROP_ID_EMPTY')
+            ));
+        }
+
+        if (!$result->isSuccess()) {
+            return $result;
+        }
+
+        $dealPropCode = IblockHelper::getIblockProperties($iblockId, [$dealPropId]);
+
+        if (empty($dealPropCode)) {
+            return $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBL_ELEM_CODE_DEAL_IS_EMPTY')
+            ));
+        }
+
+        $elementObj = Iblock::wakeUp($iblockId)
+            ->getEntityDataClass()::query()
+            ->where(current($dealPropCode) . '.VALUE', $dealId)
+            ->setSelect(['ID'])
+            ->fetchObject();
+
+        if (!is_object($elementObj)) {
+            return $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBLOCK_ELEM_EMPTY')
+            ));
+        }
+
+        $orderId = $elementObj?->getId();
+
+        if (!$orderId) {
+            return $result->addError(new Error(
+                Loc::getMessage('OTUS_SYNCDEALIBLOCK_IBLOCK_ELEM_DEAL_ID_EMPTY', ['#DEAL_ID#' => $dealId])
+            ));
+        }
+
+        return $result->setData([$orderId]);
     }
 }

@@ -6,54 +6,53 @@ use Bitrix\Crm\DealTable;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Otus\SyncDealIblock\Utils\BaseUtils;
+use Otus\SyncDealIblock\Traits\ModuleTrait;
+use Otus\SyncDealIblock\Traits\HandlerTrait;
 use Otus\SyncDealIblock\Helpers\IblockHelper;
+use Otus\SyncDealIblock\Contracts\Handlers\BaseHandler;
 use Otus\SyncDealIblock\Exceptions\ModuleException;
 
-class IblockHandlers
+class IblockHandler implements BaseHandler
 {
-    protected static $moduleId = 'otus.syncdealiblock';
-
-    protected static $requireProps = [
-        'IBLOCK_ID' => 'OTUS_SYNCDEALIBLOCK_ORDER_IBLOCK',
-        'DEAL' => 'OTUS_SYNCDEALIBLOCK_IBLOCK_PROP_DEAL_CODE',
-        'SUM' => 'OTUS_SYNCDEALIBLOCK_IBLOCK_PROP_SUM_CODE',
-        'ASSIGNED' => 'OTUS_SYNCDEALIBLOCK_IBLOCK_PROP_ASSIGNED_CODE',
-        'ORDER' => 'OTUS_SYNCDEALIBLOCK_CRM_DEAL_PROP_UF_ORDER'
-    ];
+    use ModuleTrait;
+    use HandlerTrait;
 
     public static function beforeAdd(&$arFields)
     {
-        foreach (self::$requireProps as $key => $code) {
+        foreach (self::REQUIRE_PROPS as $key => $code) {
             if (Option::get(self::$moduleId, $code) == false) {
 
-                ModuleException::exceptionModuleOption($key, self::$requireProps);
+                ModuleException::exceptionModuleOption($key, self::REQUIRE_PROPS);
 
                 return false;
             }
         }
     }
 
-    public static function afterAdd(&$arFields)
+    public static function afterAdd($arFields)
     {
-        $sumPropId = Option::get(self::$moduleId, self::$requireProps['SUM']);
+        if (self::$handlerDisallow) return;
+        self::$handlerDisallow = true;
+
+        $sumPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['SUM']);
 
         if (!$sumPropId) {
             return false;
         }
 
-        $dealPropId = Option::get(self::$moduleId, self::$requireProps['DEAL']);
+        $dealPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL']);
 
         if (!$dealPropId) {
             return false;
         }
 
-        $assignedPropId = Option::get(self::$moduleId, self::$requireProps['ASSIGNED']);
+        $assignedPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['ASSIGNED']);
 
         if (!$assignedPropId) {
             return false;
         }
 
-        $orderPropDealCode = Option::get(self::$moduleId, self::$requireProps['ORDER']);
+        $orderPropDealCode = Option::get(self::$moduleId, self::REQUIRE_PROPS['ORDER']);
         if (empty($orderPropDealCode)) {
             return false;
         }
@@ -108,20 +107,25 @@ class IblockHandlers
                 ]
             );
         }
+
+        self::$handlerDisallow = false;
     }
 
     public static function beforeUpdate(&$arFields)
     {
+        if (self::$handlerDisallow) return;
+        self::$handlerDisallow = true;
+
         global $APPLICATION;
 
         $dealId = null;
         $dealUpdFields = [];
         $elementId = $arFields['ID'];
 
-        $iblockId = Option::get(self::$moduleId, self::$requireProps['IBLOCK_ID']);
-        $sumPropId = Option::get(self::$moduleId, self::$requireProps['SUM']);
-        $dealPropId = Option::get(self::$moduleId, self::$requireProps['DEAL']);
-        $assignedPropId = Option::get(self::$moduleId, self::$requireProps['ASSIGNED']);
+        $iblockId = Option::get(self::$moduleId, self::REQUIRE_PROPS['IBLOCK_ID']);
+        $sumPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['SUM']);
+        $dealPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL']);
+        $assignedPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['ASSIGNED']);
 
         $propsCodes = IblockHelper::getIblockProperties($iblockId, [$dealPropId]);
 
@@ -137,7 +141,7 @@ class IblockHandlers
 
         if (!$dealId->isSuccess()) {
             $APPLICATION->throwException(
-                BaseUtils::extractErrorMessage($dealId->getErrorMessages())
+                BaseUtils::extractErrorMessage($dealId)
             );
 
             return false;
@@ -167,58 +171,66 @@ class IblockHandlers
             }
 
             (new \CCrmDeal)->Update(
-                $dealId,
+                current($dealId->getData()),
                 $dealUpdFields,
                 true,
                 true,
                 ['DISABLE_USER_FIELD_CHECK' => true]
             );
         }
+
+        self::$handlerDisallow = false;
     }
 
     public static function beforeDelete($id)
     {
+        if (self::$handlerDisallow) return;
+        self::$handlerDisallow = true;
+
         global $APPLICATION;
 
-        $iblockId = Option::get(self::$moduleId, self::$requireProps['IBLOCK_ID']);
-        $dealPropId = Option::get(self::$moduleId, self::$requireProps['DEAL']);
+        $iblockId = Option::get(self::$moduleId, self::REQUIRE_PROPS['IBLOCK_ID']);
+        $dealPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL']);
 
         $dealId = IblockHelper::getDealIdFromOrder($iblockId, $id, $dealPropId);
 
-        if (!$dealId->isSuccess()) {
+        if ($dealId->isSuccess()) {
             $APPLICATION->throwException(
-                BaseUtils::extractErrorMessage($dealId->getErrorMessages())
+                BaseUtils::extractErrorMessage($dealId)
             );
 
-            return false;
+            $dealId = current($dealId->getData());
+
+            if (!(new \CCrmDeal)->Exists($dealId)) {
+                return true;
+            }
+
+            $dealInfo = DealTable::query()
+                ->where('ID', $dealId)
+                ->setSelect(['CLOSED'])
+                ->exec()->fetch();
+
+            if ($dealInfo['CLOSED'] != 'Y') {
+                $APPLICATION->throwException(
+                    Loc::getMessage(
+                        'OTUS_SYNCDEALIBLOCK_ORDER_DELETE_DEAL_CLOSED_FAIL',
+                        ['#DEAL_ID#' => $dealId, '#ORDER_ID#' => $id]
+                    )
+                );
+
+                return false;
+            }
         }
 
-        $dealId = current($dealId->getData());
-
-        if (!(new \CCrmDeal)->Exists($dealId)) {
-            return true;
-        }
-
-        $dealInfo = DealTable::query()
-            ->where('ID', $dealId)
-            ->setSelect(['CLOSED'])
-            ->exec()->fetch();
-
-        if ($dealInfo['CLOSED'] != 'Y') {
-            $APPLICATION->throwException(
-                Loc::getMessage(
-                    'OTUS_SYNCDEALIBLOCK_ORDER_DELETE_DEAL_CLOSED_FAIL',
-                    ['#DEAL_ID#' => $dealId, '#ORDER_ID#' => $id]
-                )
-            );
-
-            return false;
-        }
+        self::$handlerDisallow = false;
     }
 
     public static function afterDelete($arFields)
     {
-        $orderPropDealCode = Option::get(self::$moduleId, self::$requireProps['ORDER']);
+        if (self::$handlerDisallow) return;
+        self::$handlerDisallow = true;
+
+        $orderPropDealCode = Option::get(self::$moduleId, self::REQUIRE_PROPS['ORDER']);
         if (empty($orderPropDealCode)) {
             return false;
         }
@@ -231,5 +243,7 @@ class IblockHandlers
         if ($dealId) {
             (new \CCrmDeal)->Delete($dealId);
         }
+
+        self::$handlerDisallow = false;
     }
 }

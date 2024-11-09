@@ -117,35 +117,35 @@ class otus_syncdealiblock extends CModule
             'iblock',
             'OnBeforeIBlockElementAdd',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'beforeAdd'
         );
         $this->eventManager->registerEventHandler(
             'iblock',
             'OnAfterIBlockElementAdd',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'afterAdd'
         );
         $this->eventManager->registerEventHandler(
             'iblock',
             'OnBeforeIBlockElementUpdate',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'beforeUpdate'
         );
         $this->eventManager->registerEventHandler(
             'iblock',
             'OnBeforeIBlockElementDelete',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'beforeDelete'
         );
         $this->eventManager->registerEventHandler(
             'iblock',
             'OnAfterIBlockElementDelete',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'afterDelete'
         );
 
@@ -153,28 +153,28 @@ class otus_syncdealiblock extends CModule
             'crm',
             'OnAfterCrmDealAdd',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandler',
             'afterAdd'
         );
         $this->eventManager->registerEventHandler(
             'crm',
             'OnBeforeCrmDealUpdate',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandler',
             'beforeUpdate'
         );
         $this->eventManager->registerEventHandler(
             'crm',
             'OnBeforeCrmDealDelete',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandler',
             'beforeDelete'
         );
         $this->eventManager->registerEventHandler(
             'crm',
             'OnAfterCrmDealDelete',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandler',
             'afterDelete'
         );
     }
@@ -185,35 +185,35 @@ class otus_syncdealiblock extends CModule
                 'iblock',
                 'OnBeforeIBlockElementAdd',
                 $this->MODULE_ID,
-                '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+                '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
                 'beforeAdd'
             );
         $this->eventManager->unRegisterEventHandler(
             'iblock',
             'OnAfterIBlockElementAdd',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'afterAdd'
         );
         $this->eventManager->unRegisterEventHandler(
             'iblock',
             'OnBeforeIBlockElementUpdate',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'beforeUpdate'
         );
         $this->eventManager->unRegisterEventHandler(
             'iblock',
             'OnBeforeIBlockElementDelete',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'beforeDelete'
         );
         $this->eventManager->unRegisterEventHandler(
             'iblock',
             'OnAfterIBlockElementDelete',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler',
             'afterDelete'
         );
 
@@ -221,28 +221,28 @@ class otus_syncdealiblock extends CModule
             'crm',
             'OnAfterCrmDealAdd',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandler',
             'afterAdd'
         );
         $this->eventManager->unRegisterEventHandler(
             'crm',
             'OnBeforeCrmDealUpdate',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandler',
             'beforeUpdate'
         );
         $this->eventManager->unRegisterEventHandler(
             'crm',
             'OnBeforeCrmDealDelete',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandler',
             'beforeDelete'
         );
         $this->eventManager->unRegisterEventHandler(
             'crm',
             'OnAfterCrmDealDelete',
             $this->MODULE_ID,
-            '\\Otus\\SyncDealIblock\\Handlers\\DealHandlers',
+            '\\Otus\\SyncDealIblock\\Handlers\\DealHandler',
             'afterDelete'
         );
     }

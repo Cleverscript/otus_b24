@@ -39,4 +39,23 @@ class DealHelper
 
         return $result->setData($data);
     }
+
+    public static function diffChangePropsVals(array $fields, array $arFields): array
+    {
+        $result = [];
+        $dealId = $arFields['ID'];
+
+        $dealInfo = DealTable::query()
+            ->where('ID', $dealId)
+            ->setSelect($fields)
+            ->exec()->fetch();
+
+        foreach ($fields as $fieldCode) {
+            if (empty($arFields[$fieldCode]) || $dealInfo[$fieldCode] === $arFields[$fieldCode]) continue;
+
+            $result[$fieldCode] = $arFields[$fieldCode];
+        }
+
+        return $result;
+    }
 }
