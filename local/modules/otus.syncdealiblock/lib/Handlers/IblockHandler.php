@@ -40,51 +40,58 @@ class IblockHandler implements BaseHandler
             return false;
         }
 
+        $iblockId = $arFields['IBLOCK_ID'];
         $dealPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL']);
+        $dealPropCode = current(IblockHelper::getIblockProperties($iblockId, [$dealPropId]));
 
         if (!$dealPropId) {
             return false;
         }
 
-        $assignedPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['ASSIGNED']);
-
-        if (!$assignedPropId) {
-            return false;
-        }
-
-        $orderPropDealCode = Option::get(self::$moduleId, self::REQUIRE_PROPS['ORDER']);
-        if (empty($orderPropDealCode)) {
-            return false;
-        }
-
-        $sumDeal = IblockHelper::getElementPropValue($sumPropId, $arFields);
-
-        if (!$sumDeal) {
-            return true;
-        }
-
-        $assignedDeal = IblockHelper::getElementPropValue($assignedPropId, $arFields);
-
-        if (!$assignedDeal) {
-            return true;
-        }
-
-        $arFieldsDeal = [
-            'TITLE' => $arFields['NAME'],
-            'OPPORTUNITY' => $sumDeal,
-            'ASSIGNED_BY_ID' => $assignedDeal,
-            'STAGE_ID' => 'NEW',
-            $orderPropDealCode => $arFields['ID']
-        ];
-
         $deal = new \CCrmDeal;
 
-        $dealId = $deal->Add($arFieldsDeal, true, []);
+        $orderId = $arFields['ID'];
+        $dealId = $arFields['PROPERTY_VALUES'][$dealPropCode];
+
+        if (!$dealId) {
+            $assignedPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['ASSIGNED']);
+
+            if (!$assignedPropId) {
+                return false;
+            }
+
+            $orderPropDealCode = Option::get(self::$moduleId, self::REQUIRE_PROPS['ORDER']);
+            if (empty($orderPropDealCode)) {
+                return false;
+            }
+
+            $sumDeal = IblockHelper::getElementPropValue($sumPropId, $arFields);
+
+            if (!$sumDeal) {
+                return true;
+            }
+
+            $assignedDeal = IblockHelper::getElementPropValue($assignedPropId, $arFields);
+
+            if (!$assignedDeal) {
+                return true;
+            }
+
+            $arFieldsDeal = [
+                'TITLE' => $arFields['NAME'],
+                'OPPORTUNITY' => $sumDeal,
+                'ASSIGNED_BY_ID' => $assignedDeal,
+                'STAGE_ID' => 'NEW',
+                $orderPropDealCode => $arFields['ID']
+            ];
+
+            $dealId = $deal->Add($arFieldsDeal, true, []);
+        }
 
         $arFieldsDeal = [
             'TITLE' => Loc::getMessage('OTUS_SYNCDEALIBLOCK_DEAL_TITLE_NEW', [
                 '#DEAL_ID#' => $dealId,
-                '#ORDER_ID#' => $arFields['ID'],
+                '#ORDER_ID#' => $orderId,
             ]),
         ];
 
@@ -92,17 +99,17 @@ class IblockHandler implements BaseHandler
             $deal->Update($dealId, $arFieldsDeal, true, true, []);
 
             \CIBlockElement::SetPropertyValuesEx(
-                $arFields['ID'],
+                $orderId,
                 $arFields['IBLOCK_ID'],
                 [$dealPropId => $dealId]
             );
 
             (new \CIBlockElement)->Update(
-                $arFields['ID'],
+                $orderId,
                 [
                     'NAME' => Loc::getMessage('OTUS_SYNCDEALIBLOCK_ORDER_NAME_NEW', [
                         '#DEAL_ID#' => $dealId,
-                        '#ORDER_ID#' => $arFields['ID'],
+                        '#ORDER_ID#' => $orderId,
                     ])
                 ]
             );

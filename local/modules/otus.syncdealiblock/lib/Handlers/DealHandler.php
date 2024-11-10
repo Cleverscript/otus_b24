@@ -43,27 +43,31 @@ class DealHandler implements BaseHandler
         $dealPropCode = current(IblockHelper::getIblockProperties($iblockId, [$dealPropId]));
         $assignedPropCode = current(IblockHelper::getIblockProperties($iblockId, [$assignedPropId]));
         $sumPropCode = current(IblockHelper::getIblockProperties($iblockId, [$sumPropId]));
+        $orderPropCode = Option::get(self::$moduleId, self::REQUIRE_PROPS['ORDER']);
 
         $dealId = $arFields['ID'];
+        $orderId = $arFields[$orderPropCode];
 
         $el = new \CIBlockElement;
 
-        $orderProps = [
-            $dealPropCode => $arFields['ID'],
-            $assignedPropCode => $arFields['ASSIGNED_BY_ID'],
-            $sumPropCode => $arFields['OPPORTUNITY_ACCOUNT'],
-        ];
-
-        $orderId = $el->Add([
-            "IBLOCK_SECTION_ID" => false,
-            "IBLOCK_ID"      => $iblockId,
-            "PROPERTY_VALUES"=> $orderProps,
-            "NAME"           => $arFields['TITLE'],
-            "ACTIVE"         => "Y"
-        ]);
-
         if (!$orderId) {
-            $APPLICATION->ThrowException($el->LAST_ERROR);
+            $orderProps = [
+                $dealPropCode => $arFields['ID'],
+                $assignedPropCode => $arFields['ASSIGNED_BY_ID'],
+                $sumPropCode => $arFields['OPPORTUNITY_ACCOUNT'],
+            ];
+
+            $orderId = $el->Add([
+                "IBLOCK_SECTION_ID" => false,
+                "IBLOCK_ID" => $iblockId,
+                "PROPERTY_VALUES" => $orderProps,
+                "NAME" => $arFields['TITLE'],
+                "ACTIVE" => "Y"
+            ]);
+
+            if (!$orderId) {
+                $APPLICATION->ThrowException($el->LAST_ERROR);
+            }
         }
 
         $el->Update(
@@ -79,7 +83,7 @@ class DealHandler implements BaseHandler
         $arFieldsDeal = [
             'TITLE' => Loc::getMessage('OTUS_SYNCDEALIBLOCK_DEAL_TITLE_NEW', [
                 '#DEAL_ID#' => $dealId,
-                '#ORDER_ID#' => $arFields['ID'],
+                '#ORDER_ID#' => $orderId,
             ]),
         ];
 
