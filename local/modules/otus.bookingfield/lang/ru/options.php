@@ -1,0 +1,4 @@
+<?php
+$MESS['OTUS_BOOKINGFIELD_MAIN_TAB_SETTINGS'] = 'Главные настройки';
+$MESS['OTUS_BOOKINGFIELD_MAIN_TAB_SETTINGS_TITLE'] = 'Главные настройки';
+$MESS['OTUS_BOOKINGFIELD_IBLOCK_PROCEDURES'] = 'Инфоблок с процедурами';
