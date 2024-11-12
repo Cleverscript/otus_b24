@@ -22,46 +22,28 @@ class BookingProcedureLink
         );
     }
 
-
-    public static function PrepareSettings($arFields)
-    {
-        // return array("_BLANK" => ($arFields["USER_TYPE_SETTINGS"]["_BLANK"] == "Y" ? "Y" : "N"));
-        if(is_array($arFields["USER_TYPE_SETTINGS"]) && $arFields["USER_TYPE_SETTINGS"]["_BLANK"] == "Y"){
-            return array("_BLANK" =>  "Y");
-        }else{
-            return array("_BLANK" =>  "N");
-        }
-    }
-
-   
     public static function GetPublicViewHTML($arProperty, $arValue, $strHTMLControlName)
     {
-        $arSettings = self::PrepareSettings($arProperty);
+        $propVal = self::preparePropVal($arValue['VALUE']);
 
-        $arVals = array();
-        if (!is_array($arProperty['VALUE'])) {
-            $arProperty['VALUE'] = array($arProperty['VALUE']);
-            $arProperty['DESCRIPTION'] = array($arProperty['DESCRIPTION']);
-        }
-        foreach ($arProperty['VALUE'] as $i => $value) {
-            $arVals[$value] = $arProperty['DESCRIPTION'][$i];
-        }
+        $strResult = "<a class=\"booking_link\" data-procedure-id=\"{$propVal['ID']}\" href=\"javascript:void(0);\">";
+        $strResult .= "{$propVal['NAME']}";
+        $strResult .= "</a>";
 
-        $strResult = '';
-        $strResult = '<a ' . ($arSettings["_BLANK"] == 'Y' ? 'target="_blank"' : '') . ' href="' . trim($arValue['VALUE']) . '">' . (trim($arVals[$arValue['VALUE']]) ? trim($arVals[$arValue['VALUE']]) : trim($arValue['VALUE'])) . '</a>';
         return $strResult;
     }
-
 
     public static function GetAdminListViewHTML($arProperty, $arValue, $strHTMLControlName)
     {
-        $arSettings = self::PrepareSettings($arProperty);
-
-        $strResult = '';
-        $strResult = '<a ' . ($arSettings["_BLANK"] == 'Y' ? 'target="_blank"' : '') . ' href="' . trim($arValue['VALUE']) . '">' . (trim($arValue['DESCRIPTION']) ? trim($arValue['DESCRIPTION']) : trim($arValue['VALUE'])) . '</a>';
-        return $strResult;
+        $propVal = self::preparePropVal($arValue['VALUE']);
+        return "[{$propVal['ID']}] {$propVal['NAME']}";
     }
 
+    public static function preparePropVal(string $val)
+    {
+        $explVal = explode(';', $val);
+        return ['ID' => current($explVal), 'NAME' => array_pop($explVal)];
+    }
 
     public static function GetSearchContent($arProperty, $value, $strHTMLControlName)
     {
@@ -82,9 +64,14 @@ class BookingProcedureLink
 
         if (!$propId) return $strResult;
 
-        $iblProceduresId = Option::get('otus.clinic', 'OTUS_CLINIC_IBLOCK_PROCEDURES');
+        $iblProceduresId = Option::get('otus.bookingfield', 'OTUS_BOOKINGFIELD_IBLOCK_PROCEDURES');
+
+        if (!$iblProceduresId) {
+            return $strResult;
+        }
 
         $iblockProcedures = Iblock::wakeUp($iblProceduresId)->getEntityDataClass();
+
         $rows = $iblockProcedures::query()
             ->where('ACTIVE', 'Y')
             ->setSelect(['ID', 'NAME'])
@@ -93,8 +80,6 @@ class BookingProcedureLink
         $inpid = md5('link_' . rand(0, 999));
 
         $value = htmlspecialcharsex($arValue['VALUE']);
-
-        //dump([$arProperty, $arValue, $strHTMLControlName]);
 
         $strResult .= "<select id=\"select_{$propId}_{$inpid}\">";
         $strResult .= "<option value=\"\">---</option>";
