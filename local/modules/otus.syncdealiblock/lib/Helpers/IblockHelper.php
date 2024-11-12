@@ -6,7 +6,9 @@ use Bitrix\Main\Error;
 use Bitrix\Main\Result;
 use Bitrix\Iblock\Iblock;
 use Bitrix\Iblock\IblockTable;
-use \Bitrix\Iblock\PropertyTable;
+use Bitrix\Main\Config\Option;
+use Bitrix\Iblock\ElementTable;
+use Bitrix\Iblock\PropertyTable;
 use Bitrix\Main\Localization\Loc;
 
 class IblockHelper
@@ -237,5 +239,24 @@ class IblockHelper
         }
 
         return $result->setData([$orderId]);
+    }
+
+    public static function getIblockIdByElement(int $elementId)
+    {
+        return ElementTable::getList([
+            'select' => [
+                'IBLOCK_ID',
+            ],
+            'filter' => ['ID' => $elementId],
+        ])->fetch()['IBLOCK_ID'];
+    }
+
+    public static function isAllowIblock(int $elementId, string $moduleId, int $iblockId = 0): bool
+    {
+        if (!$iblockId) {
+            $iblockId = self::getIblockIdByElement($elementId);
+        }
+
+        return $iblockId == Option::get($moduleId, 'OTUS_SYNCDEALIBLOCK_ORDER_IBLOCK');
     }
 }

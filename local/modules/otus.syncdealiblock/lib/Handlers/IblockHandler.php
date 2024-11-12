@@ -19,6 +19,10 @@ class IblockHandler implements BaseHandler
 
     public static function beforeAdd(&$arFields)
     {
+        if (!IblockHelper::isAllowIblock($arFields['ID'], self::$moduleId, $arFields['IBLOCK_ID'])) {
+            return;
+        }
+
         foreach (self::REQUIRE_PROPS as $key => $code) {
             if (Option::get(self::$moduleId, $code) == false) {
 
@@ -31,6 +35,10 @@ class IblockHandler implements BaseHandler
 
     public static function afterAdd($arFields)
     {
+        if (!IblockHelper::isAllowIblock($arFields['ID'], self::$moduleId, $arFields['IBLOCK_ID'])) {
+            return;
+        }
+
         if (self::$handlerDisallow) return;
         self::$handlerDisallow = true;
 
@@ -120,6 +128,10 @@ class IblockHandler implements BaseHandler
 
     public static function beforeUpdate(&$arFields)
     {
+        if (!IblockHelper::isAllowIblock($arFields['ID'], self::$moduleId, $arFields['IBLOCK_ID'])) {
+            return;
+        }
+
         if (self::$handlerDisallow) return;
         self::$handlerDisallow = true;
 
@@ -191,12 +203,17 @@ class IblockHandler implements BaseHandler
 
     public static function beforeDelete($id)
     {
+        if (!IblockHelper::isAllowIblock($id, self::$moduleId)) {
+            return;
+        }
+
         if (self::$handlerDisallow) return;
         self::$handlerDisallow = true;
 
         global $APPLICATION;
 
         $iblockId = Option::get(self::$moduleId, self::REQUIRE_PROPS['IBLOCK_ID']);
+
         $dealPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL']);
 
         $dealId = IblockHelper::getDealIdFromOrder($iblockId, $id, $dealPropId);
@@ -234,6 +251,10 @@ class IblockHandler implements BaseHandler
 
     public static function afterDelete($arFields)
     {
+        if (!IblockHelper::isAllowIblock($arFields['ID'], self::$moduleId, $arFields['IBLOCK_ID'])) {
+            return;
+        }
+
         if (self::$handlerDisallow) return;
         self::$handlerDisallow = true;
 
