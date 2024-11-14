@@ -31,4 +31,29 @@ class IblockHelper
 
         return $result->setData($data);
     }
+
+    public static function getIblockProps(int $iblockId): Result
+    {
+        $data = [];
+        $result = new Result;
+
+        $rsProp = \CIBlockProperty::GetList(
+            [
+                'SORT' => 'ASC',
+                'NAME' => 'ASC',
+            ],
+            [
+                'ACTIVE' => 'Y',
+                'IBLOCK_ID' => $iblockId,
+            ]
+        );
+
+        while ($arr = $rsProp->Fetch()) {
+            if (in_array($arr['PROPERTY_TYPE'], ['L', 'N', 'S', 'E'])) {
+                $data[$arr['ID']] = '[' . $arr['CODE'] . '] ' . $arr['NAME'];
+            }
+        }
+
+        return $result->setData($data);
+    }
 }

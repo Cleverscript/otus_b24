@@ -4,10 +4,13 @@ namespace Otus\Bookingfield\UserTypes;
 
 use Bitrix\Iblock\Iblock;
 use Bitrix\Main\Config\Option;
-use Bitrix\Main\Localization\Loc;;
+use Bitrix\Main\Localization\Loc;
+use Otus\Bookingfield\Traits\ModuleTrait;
 
 class BookingProcedureLink
 {
+    use ModuleTrait;
+
     public static function GetUserTypeDescription()
     {
         return array(
@@ -64,7 +67,7 @@ class BookingProcedureLink
 
         if (!$propId) return $strResult;
 
-        $iblProceduresId = Option::get('otus.bookingfield', 'OTUS_BOOKINGFIELD_IBLOCK_PROCEDURES');
+        $iblProceduresId = Option::get(self::$moduleId, 'OTUS_BOOKINGFIELD_IBLOCK_PROCEDURES');
 
         if (!$iblProceduresId) {
             return $strResult;
