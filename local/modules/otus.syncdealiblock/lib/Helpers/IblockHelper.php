@@ -251,7 +251,7 @@ class IblockHelper
         ])->fetch()['IBLOCK_ID'];
     }
 
-    public static function isAllowIblock(int $elementId, string $moduleId, int $iblockId = 0): bool
+    public static function isAllowIblock($elementId = null, string $moduleId, int $iblockId = 0): bool
     {
         if (!$iblockId) {
             $iblockId = self::getIblockIdByElement($elementId);
