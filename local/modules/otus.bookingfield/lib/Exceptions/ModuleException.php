@@ -9,14 +9,10 @@ class ModuleException
 {
     use ModuleTrait;
 
-    public static function exceptionModuleOption(string $code, array $requireProps): void
+    public static function exceptionModuleOption(string $code, array $requireProps): string
     {
-        global $APPLICATION;
-
-        $APPLICATION->throwException(
-            Loc::getMessage($requireProps[$code] . "_EMPTY",
-                ['#MODULE_ID#' => self::$moduleId]
-            )
+        return Loc::getMessage($requireProps[$code] . "_EMPTY",
+            ['#MODULE_ID#' => self::$moduleId]
         );
     }
 }
