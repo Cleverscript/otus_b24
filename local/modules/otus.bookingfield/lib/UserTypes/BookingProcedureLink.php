@@ -5,6 +5,7 @@ namespace Otus\Bookingfield\UserTypes;
 use Bitrix\Iblock\Iblock;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\Engine\CurrentUser;
 use Otus\Bookingfield\Traits\ModuleTrait;
 
 class BookingProcedureLink
@@ -29,7 +30,12 @@ class BookingProcedureLink
     {
         $propVal = self::preparePropVal($arValue['VALUE']);
 
-        $strResult = "<a class=\"booking_link\" data-procedure-id=\"{$propVal['ID']}\" href=\"javascript:void(0);\">";
+        $strResult = "<a class=\"procedure-item-grid\"";
+        $strResult .= " data-procedure-id=\"{$propVal['ID']}\"";
+        $strResult .= " data-procedure-name=\"{$propVal['NAME']}\"";
+        $strResult .= " data-iblock-id=\"{$propVal['IBLOCK_ID']}\"";
+        $strResult .= " data-fio=\"{$propVal['FIO']}\"";
+        $strResult .= " href=\"javascript:void(0);\">";
         $strResult .= "{$propVal['NAME']}";
         $strResult .= "</a>";
 
@@ -44,8 +50,16 @@ class BookingProcedureLink
 
     public static function preparePropVal(string $val)
     {
+        $iblBookingProcedureId = Option::get(self::$moduleId, 'OTUS_BOOKINGFIELD_IBLOCK_BOOKING');
+
         $explVal = explode(';', $val);
-        return ['ID' => current($explVal), 'NAME' => array_pop($explVal)];
+
+        return [
+            'ID' => current($explVal),
+            'NAME' => array_pop($explVal),
+            'FIO' => CurrentUser::get()->getFullName() ?: CurrentUser::get()->getLogin(),
+            'IBLOCK_ID' => $iblBookingProcedureId,
+        ];
     }
 
     public static function GetSearchContent($arProperty, $value, $strHTMLControlName)

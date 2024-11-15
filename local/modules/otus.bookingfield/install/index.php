@@ -136,12 +136,22 @@ class otus_bookingfield extends CModule
      */
     function InstallEvents()
     {
-        (EventManager::getInstance())->registerEventHandler(
+        $eventManager = EventManager::getInstance();
+
+        $eventManager->registerEventHandler(
             "iblock",
             "OnIBlockPropertyBuildList",
             $this->MODULE_ID,
             '\Otus\Bookingfield\UserTypes\BookingProcedureLink',
             "GetUserTypeDescription"
+        );
+
+        $eventManager->registerEventHandler(
+            "main",
+            "OnPageStart",
+            $this->MODULE_ID,
+            '\Otus\Bookingfield\Helpers\ExtensionHelper',
+            "getExtensions"
         );
     }
 
@@ -150,12 +160,22 @@ class otus_bookingfield extends CModule
      */
     function UnInstallEvents()
     {
-        (EventManager::getInstance())->unRegisterEventHandler(
+        $eventManager = EventManager::getInstance();
+
+        $eventManager->unRegisterEventHandler(
             "iblock",
             "OnIBlockPropertyBuildList",
             $this->MODULE_ID,
             '\Otus\Bookingfield\UserTypes\BookingProcedureLink',
             "GetUserTypeDescription"
+        );
+
+        $eventManager->unRegisterEventHandler(
+            "main",
+            "OnPageStart",
+            $this->MODULE_ID,
+            '\Otus\Bookingfield\Helpers\ExtensionHelper',
+            "getExtensions"
         );
     }
 
@@ -198,10 +218,10 @@ class otus_bookingfield extends CModule
         return [
             "reference_id" => array("D", "K", "S", "W"),
             "reference" => [
-                "[D] " . Loc::getMessage("ITSCRIPT_QNA_DENIED"),
-                "[K] " . Loc::getMessage("ITSCRIPT_QNA_READ_COMPONENT"),
-                "[S] " . Loc::getMessage("ITSCRIPT_QNA_WRITE_SETTINGS"),
-                "[W] " . Loc::getMessage("ITSCRIPT_QNA_FULL")
+                "[D] " . Loc::getMessage("OTUS_BOOKINGFIELD_DENIED"),
+                "[K] " . Loc::getMessage("OTUS_BOOKINGFIELD_READ"),
+                "[S] " . Loc::getMessage("OTUS_BOOKINGFIELD_WRITE_SETTINGS"),
+                "[W] " . Loc::getMessage("OTUS_BOOKINGFIELD_FULL")
             ]
         ];
     }

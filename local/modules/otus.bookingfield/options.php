@@ -1,5 +1,4 @@
 <?php
-use Bitrix\Main;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
@@ -68,6 +67,13 @@ $arMainPropsTab = [
             null,
             ["selectbox", $arIblockPropertys]
         ],
+
+        [
+            "OTUS_BOOKINGFIELD_IBLOCK_BOOKING_PROP_PROCEDURE",
+            Loc::getMessage("OTUS_BOOKINGFIELD_IBLOCK_BOOKING_PROP_PROCEDURE"),
+            null,
+            ["selectbox", $arIblockPropertys]
+        ],
     ]
 ];
 
@@ -108,7 +114,7 @@ $tabControl = new CAdminTabControl("tabControl", $aTabs);
     }
     ?>
 
-    <?php require_once $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/admin/group_rights.php"; ?>
+    <?php //require_once $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/admin/group_rights.php"; ?>
 
     <?php $tabControl->Buttons(['btnApply' => false, 'btnCancel' => false, 'btnSaveAndAdd' => false]); ?>
 

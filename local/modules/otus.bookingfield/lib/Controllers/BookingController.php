@@ -6,6 +6,7 @@ use Bitrix\Main\Type\DateTime;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Engine\Controller;
+use Bitrix\Main\Engine\ActionFilter;
 use Bitrix\Main\ArgumentNullException;
 use Otus\Bookingfield\Traits\ModuleTrait;
 use Otus\Bookingfield\Exceptions\ModuleException;
@@ -18,12 +19,14 @@ class BookingController extends Controller
     {
         return [
             'add' => [
-                '-prefilters' => [
-                    ActionFilter\Authentication::class,
+                'prefilters' => [
+                    new ActionFilter\Authentication(),
+                    new ActionFilter\Csrf(),
+                    new ActionFilter\HttpMethod(
+                        [ActionFilter\HttpMethod::METHOD_POST]
+                    ),
                 ],
-                '-prefilters' => [
-                    ActionFilter\Csrf::class,
-                ],
+                'postfilters' => []
             ],
         ];
     }
@@ -31,20 +34,27 @@ class BookingController extends Controller
     public function addAction(array $fields): ?array
     {
         try {
-            if (empty($fields['name'])) {
+            if (empty($fields['fio'])) {
                 throw new ArgumentNullException(
-                    Loc::getMessage("OTUS_BOOKINGFIELD_ARGUMENT_NULL", ['#NAME#' => 'name'])
+                    Loc::getMessage("OTUS_BOOKINGFIELD_ARGUMENT_NULL", ['#NAME#' => 'fio'])
                 );
             }
 
-            if (empty($fields['date'])) {
+            if (empty($fields['datetime'])) {
                 throw new ArgumentNullException(
-                    Loc::getMessage("OTUS_BOOKINGFIELD_ARGUMENT_NULL", ['#NAME#' => 'date'])
+                    Loc::getMessage("OTUS_BOOKINGFIELD_ARGUMENT_NULL", ['#NAME#' => 'datetime'])
                 );
             }
 
-            $name = $fields['name'];
-            $date = DateTime::createFromTimestamp(strtotime($fields['date']))->format("d.m.Y h:m:s");
+            if (empty($fields['procedure_id'])) {
+                throw new ArgumentNullException(
+                    Loc::getMessage("OTUS_BOOKINGFIELD_ARGUMENT_NULL", ['#NAME#' => 'procedure_id'])
+                );
+            }
+
+            $fio = $fields['fio'];
+            $datetime = DateTime::createFromTimestamp(strtotime($fields['datetime']))->format("d.m.Y H:m:s");
+            $procedureId = $fields['procedure_id'];
 
             $iblBookingId = Option::get(self::$moduleId, 'OTUS_BOOKINGFIELD_IBLOCK_BOOKING');
 
@@ -66,13 +76,27 @@ class BookingController extends Controller
                 );
             }
 
+            $propBookinProcedureCode = Option::get(self::$moduleId, 'OTUS_BOOKINGFIELD_IBLOCK_BOOKING_PROP_PROCEDURE');
+
+            if (empty($propBookinProcedureCode)) {
+                throw new SystemException(
+                    ModuleException::exceptionModuleOption(
+                        'IBLOCK_BOOKING_PROP_PROCEDURE',
+                        self::$reqModOpt
+                    )
+                );
+            }
+
             $el = new \CIBlockElement;
 
             $id = $el->Add([
                 "IBLOCK_SECTION_ID" => false,
                 "IBLOCK_ID" => $iblBookingId,
-                "PROPERTY_VALUES" => [$propBookinDateCode => $date],
-                "NAME" => $name,
+                "PROPERTY_VALUES" => [
+                    $propBookinDateCode => $datetime,
+                    $propBookinProcedureCode => $procedureId
+                ],
+                "NAME" => $fio,
                 "ACTIVE" => "Y"
             ]);
 
