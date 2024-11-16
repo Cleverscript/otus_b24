@@ -2,6 +2,10 @@
 
 namespace Otus\SyncDealIblock\Contracts\Handlers;
 
+/**
+ * Контракт для классов с хендлер-методами обработчиков событий
+ * для элеменов инфоблоков и сделок
+ */
 interface BaseHandler
 {
     const REQUIRE_PROPS = [

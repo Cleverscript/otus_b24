@@ -9,8 +9,19 @@ use Bitrix\Main\UserFieldTable;
 use Bitrix\Main\UserFieldLangTable;
 use Bitrix\Main\Localization\Loc;
 
+/**
+ * Класс с хелпер-методами сущности сделка CRM_DEAL
+ */
 class DealHelper
 {
+    /**
+     * Возвращает массив всех пользовательских св-ств
+     * сущности сдлка CRM_DEAL
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function getDealProps(): Result
     {
         $data = [];
@@ -40,6 +51,15 @@ class DealHelper
         return $result->setData($data);
     }
 
+    /**
+     * Проверяет есть ли в полях сделки изменения
+     * @param array $fields
+     * @param array $arFields
+     * @return array
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function diffChangePropsVals(array $fields, array $arFields): array
     {
         $result = [];

@@ -12,11 +12,27 @@ use Otus\SyncDealIblock\Exceptions\ModuleException;
 use Otus\SyncDealIblock\Contracts\Handlers\BaseHandler;
 use Otus\SyncDealIblock\Utils\BaseUtils;
 
+/**
+ * Класс содержащий хендлер-методы
+ * для обработчиков сущности сделка (CRM_DEAL)
+ * - OnBeforeCrmDealAdd
+ * - OnAfterCrmDealAdd
+ * - OnBeforeCrmDealUpdate
+ * - OnBeforeCrmDealDelete
+ * - OnAfterCrmDealDelete
+ */
 class DealHandler implements BaseHandler
 {
     use ModuleTrait;
     use HandlerTrait;
 
+    /**
+     * Хендлер для события OnBeforeCrmDealAdd
+     * проверяет все ли обязательные опции модуля установлены
+     * и если нет, то выбрасывает исключение
+     * @param $arFields
+     * @return false|void
+     */
     public static function beforeAdd(&$arFields)
     {
         foreach (self::REQUIRE_PROPS as $key => $code) {
@@ -29,6 +45,14 @@ class DealHandler implements BaseHandler
         }
     }
 
+    /**
+     * Хендлер для события OnAfterCrmDealAdd
+     * после добавления сделки, создается эл-нт инфоблока
+     * и связывается с сделкой через его св-во с типом "привязка к элементам CRM",
+     * также в его св-ва записываются ответсвенный и сумма сделки
+     * @param $arFields
+     * @return void
+     */
     public static function afterAdd($arFields)
     {
         if (self::$handlerDisallow) return;
@@ -92,6 +116,15 @@ class DealHandler implements BaseHandler
         self::$handlerDisallow = false;
     }
 
+    /**
+     * Хендлер для события OnBeforeCrmDealUpdate
+     * перед сохранением сделки при редактировании,
+     * проверятся есть ли в полях сделки (ответсвенный и сумма)
+     * какие то изменения, и если они есть то эти изменения
+     * переносятся и в эл-нт инфоблока связанный с этой сделкой
+     * @param $arFields
+     * @return false|void
+     */
     public static function beforeUpdate(&$arFields)
     {
         if (self::$handlerDisallow) return;
@@ -153,6 +186,13 @@ class DealHandler implements BaseHandler
         self::$handlerDisallow = false;
     }
 
+    /**
+     * Хендлер для события OnBeforeCrmDealDelete
+     * перед удалением сделки, закрывает сделку
+     * и удаляет связанный с ней эл-нт инфоблока
+     * @param $id
+     * @return void
+     */
     public static function beforeDelete($id)
     {
         if (self::$handlerDisallow) return;
@@ -180,6 +220,11 @@ class DealHandler implements BaseHandler
         self::$handlerDisallow = false;
     }
 
+    /**
+     * Хендлер для события OnAfterCrmDealDelete
+     * @param $arFields
+     * @return void
+     */
     public static function afterDelete($arFields)
     {
         return;

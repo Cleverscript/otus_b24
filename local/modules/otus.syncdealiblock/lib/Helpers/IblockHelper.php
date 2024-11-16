@@ -11,8 +11,18 @@ use Bitrix\Iblock\ElementTable;
 use Bitrix\Iblock\PropertyTable;
 use Bitrix\Main\Localization\Loc;
 
+/**
+ * Класс с хелпер-методами для инфоблока
+ */
 class IblockHelper
 {
+    /**
+     * Возвращает объект с массивом всех инфоблоков тип список в системе
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function getIblocks(): Result
     {
         $data = [];
@@ -36,6 +46,11 @@ class IblockHelper
         return $result->setData($data);
     }
 
+    /**
+     * Возвращает объект с массивом всех св-ств инфоблока
+     * @param int $iblockId
+     * @return Result
+     */
     public static function getIblockProps(int $iblockId): Result
     {
         $data = [];
@@ -61,6 +76,12 @@ class IblockHelper
         return $result->setData($data);
     }
 
+    /**
+     * Возвращает значение св-ва элемента инфоблока по его id
+     * @param int $propId
+     * @param array $arFields
+     * @return false|mixed|string
+     */
     public static function getElementPropValue(int $propId, array $arFields)
     {
         switch (true) {
@@ -80,6 +101,15 @@ class IblockHelper
         return $val;
     }
 
+    /**
+     * Возвращает массив св-ств инфоблока по их ID
+     * @param int $iblockId
+     * @param array $propsIds
+     * @return array
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function getIblockProperties(int $iblockId, array $propsIds): array
     {
         $result = [];
@@ -101,6 +131,17 @@ class IblockHelper
         return $result;
     }
 
+    /**
+     * Возвращает массив с сввами элемента инфоблока
+     * в которых изменились значения
+     * @param int $iblockId
+     * @param array $propsIds
+     * @param array $arFields
+     * @return array
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function diffChangePropsVals(int $iblockId, array $propsIds, array $arFields): array
     {
         $result = [];
@@ -127,6 +168,16 @@ class IblockHelper
         return $result;
     }
 
+    /**
+     * Возвращает объек с ID сделки прикрепленной к эл-ту инфоблока, по его ID
+     * @param int $iblockId
+     * @param int $elementId
+     * @param int $dealPropId
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function getDealIdFromOrder(int $iblockId, int $elementId, int $dealPropId): Result
     {
         $result = new Result;
@@ -184,6 +235,16 @@ class IblockHelper
         return $result->setData([$dealId]);
     }
 
+    /**
+     * Возвращает объек содержащий ID эл-та инфоблока связанного со сделкой, по ID сделки
+     * @param int $iblockId
+     * @param int $dealId
+     * @param int $dealPropId
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function getOrderIdFromDeal(int $iblockId, int $dealId, int $dealPropId): Result
     {
         $result = new Result;
@@ -241,6 +302,14 @@ class IblockHelper
         return $result->setData([$orderId]);
     }
 
+    /**
+     * Возвращает ID инфоблока эл-нта
+     * @param int $elementId
+     * @return mixed
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function getIblockIdByElement(int $elementId)
     {
         return ElementTable::getList([
@@ -251,6 +320,18 @@ class IblockHelper
         ])->fetch()['IBLOCK_ID'];
     }
 
+    /**
+     * Возвращает истину или ложь является ли инфоблок разрешенным
+     * для выполнения хендлер-методов на обработчиках событий
+     * используется для прерывания выполнения
+     * @param $elementId
+     * @param string $moduleId
+     * @param int $iblockId
+     * @return bool
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function isAllowIblock($elementId = null, string $moduleId, int $iblockId = 0): bool
     {
         if (!$iblockId) {

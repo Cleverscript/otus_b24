@@ -12,11 +12,27 @@ use Otus\SyncDealIblock\Helpers\IblockHelper;
 use Otus\SyncDealIblock\Contracts\Handlers\BaseHandler;
 use Otus\SyncDealIblock\Exceptions\ModuleException;
 
+/**
+ * Класс содержащий хендлер-методы
+ * для обработчиков элементов инфоблока
+ * - OnBeforeIBlockElementAdd
+ * - OnAfterIBlockElementAdd
+ * - OnBeforeIBlockElementUpdate
+ * - OnBeforeIBlockElementDelete
+ * - OnAfterIBlockElementDelete
+ */
 class IblockHandler implements BaseHandler
 {
     use ModuleTrait;
     use HandlerTrait;
 
+    /**
+     * Хендлер для события OnBeforeIBlockElementAdd
+     * проверяет все ли обязательные опции модуля установлены
+     * и если нет, то выбрасывает исключение
+     * @param $arFields
+     * @return false|void
+     */
     public static function beforeAdd(&$arFields)
     {
         if (!IblockHelper::isAllowIblock($arFields['ID'], self::$moduleId, $arFields['IBLOCK_ID'])) {
@@ -33,6 +49,14 @@ class IblockHandler implements BaseHandler
         }
     }
 
+    /**
+     * Хендлер для события OnAfterIBlockElementAdd
+     * после добавления элемента инфоблока, добавляет сделку
+     * и связывает ее с элементом по его ID. После добавления сделки,
+     * обновляет ее название и название элемента инфоблока, указывая в них ID связанных сущностей
+     * @param $arFields
+     * @return bool|void
+     */
     public static function afterAdd($arFields)
     {
         if (!IblockHelper::isAllowIblock($arFields['ID'], self::$moduleId, $arFields['IBLOCK_ID'])) {
@@ -126,6 +150,14 @@ class IblockHandler implements BaseHandler
         self::$handlerDisallow = false;
     }
 
+    /**
+     * Хендлер для события OnBeforeIBlockElementUpdate
+     * проверяет есть ли изменения в св-вах эл-та инфоблока,
+     * до его сохранения при редактировании, и если они есть,
+     * то обновляет эти же значения в сделке (стоимость, ответсвенный)
+     * @param $arFields
+     * @return false|void
+     */
     public static function beforeUpdate(&$arFields)
     {
         if (!IblockHelper::isAllowIblock($arFields['ID'], self::$moduleId, $arFields['IBLOCK_ID'])) {
@@ -201,6 +233,16 @@ class IblockHandler implements BaseHandler
         self::$handlerDisallow = false;
     }
 
+    /**
+     * Хендлер для события OnBeforeIBlockElementDelete
+     * перед удалением эл-та инфоблока, проверяется закрыта ли связанная с ним сделка
+     * и если нет то выбрасывается исключение
+     * @param $id
+     * @return bool|void
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function beforeDelete($id)
     {
         if (!IblockHelper::isAllowIblock($id, self::$moduleId)) {
@@ -249,6 +291,15 @@ class IblockHandler implements BaseHandler
         self::$handlerDisallow = false;
     }
 
+    /**
+     * Хендлер для события OnAfterIBlockElementDelete
+     * после удаления эл-та инфоблока, удаляет связанную с ним сделку
+     * @param $arFields
+     * @return false|void
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function afterDelete($arFields)
     {
         if (!IblockHelper::isAllowIblock($arFields['ID'], self::$moduleId, $arFields['IBLOCK_ID'])) {

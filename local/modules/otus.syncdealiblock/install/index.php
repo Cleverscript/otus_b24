@@ -120,6 +120,7 @@ class otus_syncdealiblock extends CModule
             ['iblock', 'OnBeforeIBlockElementDelete', '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler', 'beforeDelete'],
             ['iblock', 'OnAfterIBlockElementDelete', '\\Otus\\SyncDealIblock\\Handlers\\IblockHandler', 'afterDelete'],
 
+            ['crm', 'OnBeforeCrmDealAdd', '\\Otus\\SyncDealIblock\\Handlers\\DealHandler', 'beforeAdd'],
             ['crm', 'OnAfterCrmDealAdd', '\\Otus\\SyncDealIblock\\Handlers\\DealHandler', 'afterAdd'],
             ['crm', 'OnBeforeCrmDealUpdate', '\\Otus\\SyncDealIblock\\Handlers\\DealHandler', 'beforeUpdate'],
             ['crm', 'OnBeforeCrmDealDelete', '\\Otus\\SyncDealIblock\\Handlers\\DealHandler', 'beforeDelete'],
