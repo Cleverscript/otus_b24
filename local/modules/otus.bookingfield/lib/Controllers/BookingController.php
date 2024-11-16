@@ -2,7 +2,6 @@
 namespace Otus\Bookingfield\Controllers;
 
 use Bitrix\Main\Config\Option;
-use Bitrix\Main\Type\DateTime;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Engine\Controller;
@@ -53,7 +52,7 @@ class BookingController extends Controller
             }
 
             $fio = $fields['fio'];
-            $datetime = DateTime::createFromTimestamp(strtotime($fields['datetime']))->format("d.m.Y H:m:s");
+            $datetime = $fields['datetime'];
             $procedureId = $fields['procedure_id'];
 
             $iblBookingId = Option::get(self::$moduleId, 'OTUS_BOOKINGFIELD_IBLOCK_BOOKING');
