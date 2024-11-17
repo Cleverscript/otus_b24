@@ -1,5 +1,6 @@
 <?php
-$MESS[''] = '';
-$MESS[''] = '';
-$MESS[''] = '';
-$MESS[''] = '';
+$MESS['OTUS_BOOKINGFIELD_POPUP_TITLE'] = 'Запсиь на процедуру';
+$MESS['OTUS_BOOKINGFIELD_POPUP_BTN_CANCEL'] = 'Отмена';
+$MESS['OTUS_BOOKINGFIELD_POPUP_BTN_OK'] = 'Записаться';
+$MESS['OTUS_BOOKINGFIELD_POPUP_FIELD_FIO'] = 'Ф.И.О';
+$MESS['OTUS_BOOKINGFIELD_POPUP_FIELD_DATETIME'] = 'Дата\время записи';

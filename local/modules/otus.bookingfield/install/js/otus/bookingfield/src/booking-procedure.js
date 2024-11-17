@@ -1,3 +1,38 @@
+BX.namespace('Bookingfield');
+
+BX.Bookingfield = {
+    getPopup: function (procedure_id, title, content, buttons) {
+        return new BX.PopupWindow("popup-booking-procedure-" + procedure_id, null, {
+            content: content,
+            closeIcon: {right: "10px", top: "10px"},
+            titleBar: {
+                content: BX.create("span", {
+                    html: title,
+                    'props': {'className': 'popup-booking-procedure-title-bar'}
+                })
+            },
+            zIndex: 1000,
+            offsetLeft: 0,
+            offsetTop: 10,
+            draggable: {restrict: true},
+            closeByEsc: true,
+            darkMode: false,
+            autoHide: false,
+            draggable: true,
+            resizable: true,
+            min_height: 500,
+            min_width: 800,
+            lightShadow: true,
+            angle: false,
+            overlay: {
+                backgroundColor: 'black',
+                opacity: 800
+            },
+            buttons: buttons
+        });
+    }
+}
+
 BX.ready(function () {
     let procedures = document.querySelectorAll('.procedure-item-grid');
 
@@ -17,41 +52,20 @@ BX.ready(function () {
                     event.preventDefault();
 
                     let content = '<h3>' + procedure_name + '</h3>'
-                        + '<p><label><input class="field-fio" type="text" name="fio" value="'+ fio +'" placeholder="Ф.И.О"/></label></p>'
+                        + '<p><label><input class="field-fio" type="text" name="fio" value="'+ fio +'"'
+                        + ' placeholder="' +  BX.message('OTUS_BOOKINGFIELD_POPUP_FIELD_FIO') + '"/></label></p>'
                         + '<p><label><input class="field-datetime" type="text" name="datetime"'
-                        + ' onclick="BX.calendar({node: this, field: this, bTime: true});" placeholder="Дата\\время записи"/></label></p>'
+                        + ' onclick="BX.calendar({node: this, field: this, bTime: true});"'
+                        + ' placeholder="' + BX.message('OTUS_BOOKINGFIELD_POPUP_FIELD_DATETIME') + '"/></label></p>'
                         + '<div id="popup-alert-booking-procedure-' + procedure_id + '"></div>';
 
-                    var popup = new BX.PopupWindow("popup-booking-procedure-" + procedure_id, null, {
-                        content: content,
-                        closeIcon: {right: "10px", top: "10px"},
-                        titleBar: {
-                            content: BX.create("span", {
-                                html: "Запсиь на процедуру",
-                                'props': {'className': 'popup-booking-procedure-title-bar'}
-                            })
-                        },
-                        zIndex: 1000,
-                        offsetLeft: 0,
-                        offsetTop: 10,
-                        draggable: {restrict: true},
-                        closeByEsc: true, // закрытие окна по esc
-                        darkMode: false, // окно будет светлым или темным
-                        autoHide: false, // закрытие при клике вне окна
-                        draggable: true, // можно двигать или нет
-                        resizable: true, // можно ресайзить
-                        min_height: 500, // минимальная высота окна
-                        min_width: 800, // минимальная ширина окна
-                        lightShadow: true, // использовать светлую тень у окна
-                        angle: false, // появится уголок
-                        overlay: {
-                            // объект со стилями фона
-                            backgroundColor: 'black',
-                            opacity: 800
-                        },
-                        buttons: [
+                    BX.Bookingfield.getPopup(
+                        procedure_id,
+                        BX.message('OTUS_BOOKINGFIELD_POPUP_TITLE'),
+                        content,
+                        [
                             new BX.PopupWindowButton({
-                                text: "Отмена",
+                                text: BX.message('OTUS_BOOKINGFIELD_POPUP_BTN_CANCEL'),
                                 className: "webform-button-link-cancel",
                                 events: {
                                     click: function () {
@@ -61,7 +75,7 @@ BX.ready(function () {
                                 }
                             }),
                             new BX.PopupWindowButton({
-                                text: "Записаться",
+                                text: BX.message('OTUS_BOOKINGFIELD_POPUP_BTN_OK'),
                                 className: "webform-button-link-ok",
                                 events: {
                                     click: function () {
@@ -101,14 +115,11 @@ BX.ready(function () {
                                                 formAlertBlock.innerHTML += msg + '<br/>';
                                             }
                                         });
-
                                     }
                                 }
-                            }),
+                            })
                         ]
-                    });
-
-                    popup.show();
+                    ).show();
 
                 });
 
