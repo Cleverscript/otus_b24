@@ -27,43 +27,41 @@ class CarRestHandler
 
     public static function add($arParams, $navStart, \CRestServer $server)
     {
-        if (!ServiceLocator::getInstance()->has(self::$service)) {
-            throw new \Exception(Loc::getMessage('EXCEPTION_CAR_REST_METHOD_NOT_FOUND'));
-        }
-
-        $service = ServiceLocator::getInstance()->get(self::$service);
+        $service = self::getService(self::$service);
 
         return $service->add($arParams, $navStart, $server);
     }
 
     public static function list($arParams, $navStart, \CRestServer $server)
     {
-        if (!ServiceLocator::getInstance()->has(self::$service)) {
-            throw new \Exception(Loc::getMessage('EXCEPTION_CAR_REST_METHOD_NOT_FOUND'));
-        }
-
-        $service = ServiceLocator::getInstance()->get(self::$service);
-
-        pLog([__METHOD__]);
+        $service = self::getService(self::$service);
 
         return $service->list($arParams, $navStart, $server);
     }
 
     public static function update($arParams, $navStart, \CRestServer $server)
     {
-        if (ServiceLocator::getInstance()->has(self::$service))
-        {
-            $service = ServiceLocator::getInstance()->get(self::$service);
-            return $service->update($arParams, $navStart, $server);
-        }
+        $service = self::getService(self::$service);
+
+        return $service->update($arParams, $navStart, $server);
     }
 
     public static function delete($arParams, $navStart, \CRestServer $server)
     {
-        if (ServiceLocator::getInstance()->has(self::$service))
-        {
-            $service = ServiceLocator::getInstance()->get(self::$service);
-            return $service->delete($arParams, $navStart, $server);
+        $service = self::getService(self::$service);
+
+        return $service->delete($arParams, $navStart, $server);
+    }
+
+    private static function getService(string $code)
+    {
+        if (!ServiceLocator::getInstance()->has($code)) {
+            throw new RestException(
+                json_encode(Loc::getMessage('EXCEPTION_CAR_REST_METHOD_NOT_FOUND'), JSON_UNESCAPED_UNICODE),
+                RestException::ERROR_METHOD_NOT_FOUND, \CRestServer::STATUS_NOT_FOUND
+            );
         }
+
+        return ServiceLocator::getInstance()->get($code);
     }
 }
