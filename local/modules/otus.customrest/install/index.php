@@ -197,7 +197,7 @@ class otus_customrest extends CModule
 
     function DoUninstall()
     {
-        //$this->UninstallDB();
+        $this->UninstallDB();
         $this->UnInstallEvents();
         $this->UnInstallFiles();
 

@@ -1,13 +1,10 @@
 <?php
-use Bitrix\Main;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\HttpApplication;
-use Otus\Clinic\Helpers\IblockHelper;
-use Otus\Clinic\Utils\BaseUtils;
 
-$module_id = "otus.clinic";
+$module_id = "otus.customrest";
 
 IncludeModuleLangFile($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/main/options.php');
 IncludeModuleLangFile(__FILE__);
@@ -20,46 +17,11 @@ $request = HttpApplication::getInstance()->getContext()->getRequest();
 
 $defaultOptions = Option::getDefaults($module_id);
 
-$iblocks = IblockHelper::getIblocks();
-
-if (!$iblocks->isSuccess()) {
-    CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocks));
-}
-
-$doctorsIblId = Option::get($module_id , 'OTUS_CLINIC_IBLOCK_DOCTORS');
-if ($doctorsIblId) {
-    $pops = IblockHelper::getIblockProps($doctorsIblId);
-    $arPropertys = $pops->getData();
-}
-
 $arMainPropsTab = [
     "DIV" => "edit1",
-    "TAB" => Loc::getMessage("OTUS_CLINIC_MAIN_TAB_SETTINGS"),
-    "TITLE" => Loc::getMessage("OTUS_CLINIC_MAIN_TAB_SETTINGS_TITLE"),
-    "OPTIONS" => [
-
-        [
-            "OTUS_CLINIC_IBLOCK_DOCTORS",
-            Loc::getMessage("T_OTUS_CLINIC_IBLOCK_DOCTORS"),
-            null,
-            ["selectbox", $iblocks->getData()]
-        ],
-
-        [
-            "OTUS_CLINIC_IBLOCK_PROCEDURES",
-            Loc::getMessage("T_OTUS_CLINIC_IBLOCK_PROCEDURES"),
-            null,
-            ["selectbox", $iblocks->getData()]
-        ],
-
-        [
-            "OTUS_CLINIC_IBLOCK_PROP_REFERENCE",
-            Loc::getMessage("T_OTUS_CLINIC_IBLOCK_PROP_REFERENCE"),
-            null,
-            ["selectbox", $arPropertys]
-        ],
-
-    ]
+    "TAB" => Loc::getMessage("OTUS_CUSTOMREST_MAIN_TAB_SETTINGS"),
+    "TITLE" => Loc::getMessage("OTUS_CUSTOMREST_MAIN_TAB_SETTINGS_TITLE"),
+    "OPTIONS" => []
 ];
 
 $aTabs = [

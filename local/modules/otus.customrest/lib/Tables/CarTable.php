@@ -1,7 +1,7 @@
 <?php
 namespace Otus\Customrest\Tables;
 
-use \Bitrix\Crm\ContactTable;
+use Bitrix\Crm\ContactTable;
 use Bitrix\Main\ORM\Query\Join;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ORM\Data\DataManager;
@@ -9,6 +9,7 @@ use Bitrix\Main\ORM\Fields\StringField;
 use Bitrix\Main\ORM\Fields\IntegerField;
 use Bitrix\Main\ORM\Fields\Relations\Reference;
 use Bitrix\Main\ORM\Fields\Validators\LengthValidator;
+use Bitrix\Main\ORM\Fields\Validators\UniqueValidator;
 
 Loc::loadMessages(__FILE__);
 
@@ -25,17 +26,14 @@ class CarTable extends DataManager
                 ->configurePrimary(true)
                 ->configureAutocomplete(true)
                 ->configureTitle(Loc::getMessage('ID_NAME')),
-
-            'VIN' => (new StringField('VIN',
-                [
-                    'validation' => function()
-                    {
-                        return[
-                            new LengthValidator(null, 17),
-                        ];
-                    },
-                ]
-            ))->configureTitle(Loc::getMessage('VIN_NAME'))
+            'VIN' => (new StringField('VIN'))
+                ->addValidator(
+                    (new LengthValidator(null, 17))
+                )
+                ->addValidator(
+                    (new UniqueValidator)
+                )
+                ->configureTitle(Loc::getMessage('VIN_NAME'))
                 ->configureRequired(),
 
             'BRAND' => (new StringField('BRAND'))
