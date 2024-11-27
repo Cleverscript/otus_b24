@@ -1,11 +1,13 @@
 <?php
 use Bitrix\Main\Loader;
+use Bitrix\Main\Data\Cache;
 use Bitrix\Main\Application;
 use Bitrix\Main\EventManager;
 use Bitrix\Main\Entity\Base;
 use Bitrix\Main\ModuleManager;
 use Bitrix\Main\Localization\Loc;
 use Otus\Customrest\Tables\CarTable;
+
 
 Loc::loadMessages(__FILE__);
 
@@ -119,6 +121,8 @@ class otus_customrest extends CModule
 
     function InstallEvents()
     {
+        Cache::clearCache(true, '/rest/scope/');
+
         $this->eventManager->registerEventHandler(
             'rest',
             'OnRestServiceBuildDescription',
@@ -137,6 +141,8 @@ class otus_customrest extends CModule
             '\\Otus\\Customrest\\Handlers\\CarRestHandler',
             'carRestMethodsRegistration'
         );
+
+        Cache::clearCache(true, '/rest/scope/');
     }
 
     public function InstallDB()

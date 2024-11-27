@@ -15,9 +15,8 @@ Loader::includeModule('rest');
 
 class CarRestHandler
 {
-    const SCOPE = 'otus.customrest.car';
-
-    protected static $service = 'otus.customrest.car.storage';
+    const SCOPE = 'otus.customrest_car';
+    const SERVICE = 'otus.customrest_car.storage';
 
     /**
      * Хендлер метод обработчика события регистрации REST методов,
@@ -29,11 +28,11 @@ class CarRestHandler
         Loc::getMessage('REST_SCOPE_OTUS.CUSTOMREST_CAR');
 
         return [
-            static::SCOPE => [
-                'otus.customrest.car.add' => [__CLASS__, 'add'],
-                'otus.customrest.car.list' => [__CLASS__, 'list'],
-                'otus.customrest.car.update' => [__CLASS__, 'update'],
-                'otus.customrest.car.delete' => [__CLASS__, 'delete'],
+            self::SCOPE => [
+                self::SCOPE . '.add' => [__CLASS__, 'add'],
+                self::SCOPE . '.list' => [__CLASS__, 'list'],
+                self::SCOPE . '.update' => [__CLASS__, 'update'],
+                self::SCOPE . '.delete' => [__CLASS__, 'delete'],
             ]
         ];
     }
@@ -47,7 +46,7 @@ class CarRestHandler
      */
     public static function add($arParams, $navStart, \CRestServer $server)
     {
-        $service = self::getService(self::$service);
+        $service = self::getService(self::SERVICE);
 
         return $service->add($arParams, $navStart, $server);
     }
@@ -63,7 +62,7 @@ class CarRestHandler
      */
     public static function list($arParams, $navStart, \CRestServer $server)
     {
-        $service = self::getService(self::$service);
+        $service = self::getService(self::SERVICE);
 
         return $service->list($arParams, $navStart, $server);
     }
@@ -77,7 +76,7 @@ class CarRestHandler
      */
     public static function update($arParams, $navStart, \CRestServer $server)
     {
-        $service = self::getService(self::$service);
+        $service = self::getService(self::SERVICE);
 
         return $service->update($arParams, $navStart, $server);
     }
@@ -91,7 +90,7 @@ class CarRestHandler
      */
     public static function delete($arParams, $navStart, \CRestServer $server)
     {
-        $service = self::getService(self::$service);
+        $service = self::getService(self::SERVICE);
 
         return $service->delete($arParams, $navStart, $server);
     }

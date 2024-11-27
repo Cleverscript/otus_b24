@@ -5,7 +5,7 @@
 return [
     'services' => [
         'value' => [
-            'otus.customrest.car.storage' => [
+            'otus.customrest_car.storage' => [
                 'className' => '\\Otus\\Customrest\\Services\\CarStorageService',
             ]
         ],
