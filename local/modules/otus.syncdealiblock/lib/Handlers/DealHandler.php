@@ -62,6 +62,7 @@ class DealHandler implements BaseHandler
 
         $iblockId = Option::get(self::$moduleId, self::REQUIRE_PROPS['IBLOCK_ID']);
         $dealPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL']);
+        $dealPropCategoryId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL_CATEGORY_ID']);
         $assignedPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['ASSIGNED']);
         $sumPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['SUM']);
         $dealPropCode = current(IblockHelper::getIblockProperties($iblockId, [$dealPropId]));
@@ -71,6 +72,10 @@ class DealHandler implements BaseHandler
 
         $dealId = $arFields['ID'];
         $orderId = $arFields[$orderPropCode];
+
+        if ($dealPropCategoryId != DealHelper::getDealCategoryId($dealId)) {
+            return;
+        }
 
         $el = new \CIBlockElement;
 
@@ -134,6 +139,7 @@ class DealHandler implements BaseHandler
 
         $iblockId = Option::get(self::$moduleId, self::REQUIRE_PROPS['IBLOCK_ID']);
         $dealPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL']);
+        $dealPropCategoryId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL_CATEGORY_ID']);
         $sumPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['SUM']);
         $assignedPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['ASSIGNED']);
         $sumPropCode = current(IblockHelper::getIblockProperties($iblockId, [$sumPropId]));
@@ -141,6 +147,10 @@ class DealHandler implements BaseHandler
 
         $orderUpdProps = [];
         $dealId = $arFields['ID'];
+
+        if ($dealPropCategoryId != DealHelper::getDealCategoryId($dealId)) {
+            return;
+        }
 
         $diffVals = DealHelper::diffChangePropsVals(
             ['ASSIGNED_BY_ID', 'OPPORTUNITY'],
@@ -202,6 +212,11 @@ class DealHandler implements BaseHandler
 
         $iblockId = Option::get(self::$moduleId, self::REQUIRE_PROPS['IBLOCK_ID']);
         $dealPropId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL']);
+        $dealPropCategoryId = Option::get(self::$moduleId, self::REQUIRE_PROPS['DEAL_CATEGORY_ID']);
+
+        if ($dealPropCategoryId != DealHelper::getDealCategoryId($id)) {
+            return;
+        }
 
         $arFieldsDeal = ['CLOSED' => 'Y'];
 

@@ -43,11 +43,19 @@ if (!empty($pops)) {
     }
 }
 
+$arDealCategories = DealHelper::getCategories();
+
 $arMainPropsTab = [
     "DIV" => "edit1",
     "TAB" => Loc::getMessage("OTUS_SYNCDEALIBLOCK_MAIN_TAB_SETTINGS"),
     "TITLE" => Loc::getMessage("OTUS_SYNCDEALIBLOCK_MAIN_TAB_SETTINGS_TITLE"),
     "OPTIONS" => [
+        [
+            "OTUS_SYNCDEALIBLOCK_DEAL_CATEGORY",
+            Loc::getMessage("OTUS_SYNCDEALIBLOCK_DEAL_CATEGORY"),
+            null,
+            ["selectbox", $arDealCategories]
+        ],
 
         [
             "OTUS_SYNCDEALIBLOCK_ORDER_IBLOCK",

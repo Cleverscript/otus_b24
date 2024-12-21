@@ -2,12 +2,11 @@
 
 namespace Otus\SyncDealIblock\Helpers;
 
-use Bitrix\Main\Error;
 use Bitrix\Main\Result;
 use Bitrix\Crm\DealTable;
 use Bitrix\Main\UserFieldTable;
 use Bitrix\Main\UserFieldLangTable;
-use Bitrix\Main\Localization\Loc;
+use Bitrix\Crm\Category\DealCategory;
 
 /**
  * Класс с хелпер-методами сущности сделка CRM_DEAL
@@ -77,5 +76,19 @@ class DealHelper
         }
 
         return $result;
+    }
+
+    public static function getDealCategoryId(int $dealId): int
+    {
+        return DealTable::query()
+            ->where('ID', $dealId)
+            ->addSelect('CATEGORY_ID')
+            ->exec()
+            ->fetch()['CATEGORY_ID'] ?: 0;
+    }
+
+    public static function getCategories()
+    {
+        return array_column(DealCategory::getAll(true), 'NAME', 'ID') ?: [];
     }
 }
