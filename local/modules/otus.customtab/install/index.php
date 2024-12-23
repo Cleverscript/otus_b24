@@ -171,7 +171,7 @@ class otus_customtab extends CModule
             'onEntityDetailsTabsInitialized',
             $this->MODULE_ID,
             '\\Otus\\Customtab\\Handlers\\TabHandler',
-            'updateTabs'
+            'addTabs'
         );
     }
 
@@ -197,8 +197,6 @@ class otus_customtab extends CModule
         $connection = Application::getConnection();
 
         $entities = $this->getEntities();
-
-        pLog($entities);
 
         foreach ($entities as $entity) {
             if (Application::getConnection($entity::getConnectionName())->isTableExists($entity::getTableName())) {
@@ -235,10 +233,11 @@ class otus_customtab extends CModule
 
     function DoUninstall()
     {
-        ModuleManager::unRegisterModule($this->MODULE_ID);
+        $this->UninstallDB();
         $this->UnInstallEvents();
         $this->UnInstallFiles();
-        $this->UninstallDB();
+
+        ModuleManager::unRegisterModule($this->MODULE_ID);
 
         return true;
     }
