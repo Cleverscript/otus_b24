@@ -123,8 +123,7 @@ class otus_autoservice extends CModule
 
     function UnInstallFiles()
     {
-        Directory::deleteDirectory($_SERVER["DOCUMENT_ROOT"] . '/local/components/' . str_replace('.', '/', $this->MODULE_ID) . '.list');
-        Directory::deleteDirectory($_SERVER["DOCUMENT_ROOT"] . '/local/components/' . str_replace('.', '/', $this->MODULE_ID) . '.detail');
+        Directory::deleteDirectory($_SERVER["DOCUMENT_ROOT"] . '/local/components/' . str_replace('.', '/', $this->MODULE_ID) . '.cars_grid');
     }
 
     function InstallEvents()
@@ -161,7 +160,7 @@ class otus_autoservice extends CModule
             'onEntityDetailsTabsInitialized',
             $this->MODULE_ID,
             '\\Otus\\Autoservice\\Handlers\\TabHandler',
-            'updateTabs'
+            'addTabs'
         );
     }
 

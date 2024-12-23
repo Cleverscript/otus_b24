@@ -5,6 +5,7 @@ use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\HttpApplication;
 use Otus\Autoservice\Services\IblockService;
+use Otus\Autoservice\Services\HighloadBlockService;
 use Otus\Clinic\Utils\BaseUtils;
 
 $module_id = "otus.autoservice";
@@ -26,6 +27,14 @@ if (!$iblocks->isSuccess()) {
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocks));
 }
 
+$hlblocks = (new HighloadBlockService)->getList();
+
+if (!$hlblocks->isSuccess()) {
+    CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($hlblocks));
+}
+
+$hlblocks = array_column($hlblocks->getData(), 'NAME', 'ID');
+
 $arMainPropsTab = [
     "DIV" => "edit1",
     "TAB" => Loc::getMessage("OTUS_AUTOSERVICE_MAIN_TAB_SETTINGS"),
@@ -37,6 +46,27 @@ $arMainPropsTab = [
             Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS"),
             null,
             ["selectbox", $iblocks->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_HL_CAR_BRAND",
+            Loc::getMessage("OTUS_AUTOSERVICE_HL_CAR_BRAND"),
+            null,
+            ["selectbox", $hlblocks]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_HL_CAR_MODEL",
+            Loc::getMessage("OTUS_AUTOSERVICE_HL_CAR_MODEL"),
+            null,
+            ["selectbox", $hlblocks]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_HL_CAR_COLOR",
+            Loc::getMessage("OTUS_AUTOSERVICE_HL_CAR_COLOR"),
+            null,
+            ["selectbox", $hlblocks]
         ],
 
     ]
