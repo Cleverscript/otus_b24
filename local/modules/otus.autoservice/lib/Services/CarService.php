@@ -27,6 +27,11 @@ class CarService
         $this->highloadBlockService = new HighloadBlockService;
     }
 
+    public function getCarIblockId(): int
+    {
+        return $this->iblockId;
+    }
+
     public function getCount(int $contactId)
     {
         if (!$contactId) {
@@ -125,13 +130,6 @@ class CarService
 
     private function includeModules(): void
     {
-        if (!Loader::includeModule('otus.autoservice')) {
-            throw new \Exception(Loc::getMessage(
-                "OTUS_AUTOSERVICE_MODULE_IS_NOT_INSTALLED",
-                ['#MODULE_ID#' => 'otus.autoservice']
-            ));
-        }
-
         if (!Loader::includeModule('highloadblock')) {
             throw new \Exception(Loc::getMessage(
                 "OTUS_AUTOSERVICE_MODULE_IS_NOT_INSTALLED",

@@ -7,6 +7,7 @@ use Bitrix\Main\Event;
 use Bitrix\Main\EventResult;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
+use Otus\Autoservice\Services\CarService;
 
 Loader::includeModule('crm');
 
@@ -25,10 +26,10 @@ class TabHandler
 
         if ($canUpdateDeal) {
             $tabs = match (true) {
-                $entityTypeID === \CCrmOwnerType::Contact => self::addContactTabs($entityId, $entityTypeID, $tabs),
-                $entityTypeID === \CCrmOwnerType::Deal => self::addDealTabs($entityId, $entityTypeID, $tabs),
-                $entityTypeID === \CCrmOwnerType::Lead => self::addLeadTabs($entityId, $entityTypeID, $tabs),
-                $entityTypeID === \CCrmOwnerType::Company => self::addCompanyTabs($entityId, $entityTypeID, $tabs)
+                $entityTypeID === \CCrmOwnerType::Contact => self::addContactTabs($entityId, $tabs),
+                $entityTypeID === \CCrmOwnerType::Deal => self::addDealTabs($entityId, $tabs),
+                $entityTypeID === \CCrmOwnerType::Lead => self::addLeadTabs($entityId, $tabs),
+                $entityTypeID === \CCrmOwnerType::Company => self::addCompanyTabs($entityId, $tabs)
             };
         }
 
@@ -37,10 +38,11 @@ class TabHandler
         ]);
     }
 
-    private static function addContactTabs($entityId, $entityTypeID, $tabs): array
+    private static function addContactTabs($entityId, $tabs): array
     {
         $tabName = null;
-        $carIblockId = Option::get('otus.autoservice', "OTUS_AUTOSERVICE_IB_CARS");
+        $carService = new CarService;
+        $carIblockId = $carService->getCarIblockId();
 
         foreach ($tabs as $k => $tab) {
             if ($tab['id'] == "tab_lists_{$carIblockId}") {
@@ -64,8 +66,7 @@ class TabHandler
                         "NUM_PAGE" => "5",
                         "CACHE_TYPE" => "A",
                         "CACHE_TIME" => "86400",
-                        "ENTITY_ID" => $entityId,
-                        "ENTITY_TYPEID" => $entityTypeID
+                        "ENTITY_ID" => $entityId
                     ]
                 ]
             ]
@@ -74,17 +75,17 @@ class TabHandler
         return $tabs;
     }
 
-    private static function addLeadTabs($entityId, $entityTypeID, $tabs): array
+    private static function addLeadTabs($entityId, $tabs): array
     {
         return [];
     }
 
-    private static function addCompanyTabs($entityId, $entityTypeID, $tabs): array
+    private static function addCompanyTabs($entityId, $tabs): array
     {
         return [];
     }
 
-    private static function addDealTabs($entityId, $entityTypeID, $tabs): array
+    private static function addDealTabs($entityId, $tabs): array
     {
         return [];
     }
