@@ -11,6 +11,8 @@ use Bitrix\Main\ORM\Fields\Relations\Reference;
 use Otus\Autoservice\Traits\ModuleTrait;
 use Otus\Autoservice\Services\HighloadBlockService;
 
+Loc::loadMessages(__FILE__);
+
 class CarService
 {
     private int $iblockId;

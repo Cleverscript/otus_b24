@@ -45,7 +45,14 @@ class IblockService
         return $result->setData($data);
     }
 
-    public function getIblockProperties(): Result
+    /**
+     * Возвращает объект с массивом всех св-ств инфоблока
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
+    public function getIblockProperties(string $indexName = 'ID'): Result
     {
         $result = new Result;
         $data = [];
@@ -64,7 +71,7 @@ class IblockService
         }
 
         foreach ($rows as $row) {
-            $data[$row['CODE']] = $row['NAME'];
+            $data[$row[$indexName]] = $row['NAME'];
         }
 
         return $result->setData($data);

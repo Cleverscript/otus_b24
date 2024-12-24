@@ -143,6 +143,22 @@ class otus_autoservice extends CModule
             '\\Otus\\Autoservice\\Handlers\\TabHandler',
             'addTabs'
         );
+
+        $this->eventManager->registerEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementAdd', //OnStartIBlockElementAdd
+            $this->MODULE_ID,
+            '\\Otus\\Autoservice\\Handlers\\CarHandler',
+            'beforeAdd'
+        );
+
+        $this->eventManager->registerEventHandler(
+            "iblock",
+            "OnIBlockPropertyBuildList",
+            $this->MODULE_ID,
+            '\\Otus\\Autoservice\\Handlers\\HlblockPropertyBuildListHandler',
+            "GetUserTypeDescription"
+        );
     }
 
     function UnInstallEvents()
@@ -161,6 +177,14 @@ class otus_autoservice extends CModule
             $this->MODULE_ID,
             '\\Otus\\Autoservice\\Handlers\\TabHandler',
             'addTabs'
+        );
+
+        $this->eventManager->unRegisterEventHandler(
+            "iblock",
+            "OnIBlockPropertyBuildList",
+            $this->MODULE_ID,
+            '\\Otus\\Autoservice\\Handlers\\HlblockPropertyBuildListHandler',
+            "GetUserTypeDescription"
         );
     }
 

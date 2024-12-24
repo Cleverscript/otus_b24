@@ -96,7 +96,7 @@ class CarGrid extends CBitrixComponent
         $result = new Result;
         $columns = [];
 
-        $iblockProps = $carIblockService->getIblockProperties();
+        $iblockProps = $carIblockService->getIblockProperties('CODE');
 
         if (!$iblockProps->isSuccess()) {
             return $result->addError(

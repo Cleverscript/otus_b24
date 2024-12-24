@@ -11,6 +11,8 @@ use Otus\Autoservice\Services\CarService;
 
 Loader::includeModule('crm');
 
+Loc::loadMessages(__FILE__);
+
 class TabHandler
 {
     public static function addTabs(Event $event): EventResult

@@ -33,7 +33,17 @@ if (!$hlblocks->isSuccess()) {
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($hlblocks));
 }
 
-$hlblocks = array_column($hlblocks->getData(), 'NAME', 'ID');
+$hlblArr = [];
+
+foreach ($hlblocks->getData() as $hlblock) {
+    $hlblArr[$hlblock['ID']] = "{$hlblock['NAME_LANG']} [{$hlblock['NAME']}]";
+}
+
+if ($iblockCarId = Option::get($module_id, 'OTUS_AUTOSERVICE_IB_CARS')) {
+    $iblockService = new IblockService($iblockCarId);
+
+    $iblockCarProps = $iblockService->getIblockProperties();
+}
 
 $arMainPropsTab = [
     "DIV" => "edit1",
@@ -52,21 +62,79 @@ $arMainPropsTab = [
             "OTUS_AUTOSERVICE_HL_CAR_BRAND",
             Loc::getMessage("OTUS_AUTOSERVICE_HL_CAR_BRAND"),
             null,
-            ["selectbox", $hlblocks]
+            ["selectbox", $hlblArr]
         ],
 
         [
             "OTUS_AUTOSERVICE_HL_CAR_MODEL",
             Loc::getMessage("OTUS_AUTOSERVICE_HL_CAR_MODEL"),
             null,
-            ["selectbox", $hlblocks]
+            ["selectbox", $hlblArr]
         ],
 
         [
             "OTUS_AUTOSERVICE_HL_CAR_COLOR",
             Loc::getMessage("OTUS_AUTOSERVICE_HL_CAR_COLOR"),
             null,
-            ["selectbox", $hlblocks]
+            ["selectbox", $hlblArr]
+        ],
+
+    ]
+];
+
+$arCarPropsTab = [
+    "DIV" => "edit2",
+    "TAB" => Loc::getMessage("OTUS_AUTOSERVICE_IB_CAR_PROPS_TAB_SETTINGS"),
+    "TITLE" => Loc::getMessage("OTUS_AUTOSERVICE_IB_CAR_PROPS_TAB_SETTINGS"),
+    "OPTIONS" => [
+
+        [
+            "OTUS_AUTOSERVICE_IB_CARS_PROP_BRAND",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS_PROP_BRAND"),
+            null,
+            ["selectbox", $iblockCarProps->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_IB_CARS_PROP_MODEL",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS_PROP_MODEL"),
+            null,
+            ["selectbox", $iblockCarProps->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_IB_CARS_PROP_RELEASE_DATE",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS_PROP_RELEASE_DATE"),
+            null,
+            ["selectbox", $iblockCarProps->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_IB_CARS_PROP_MILIAGE",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS_PROP_MILIAGE"),
+            null,
+            ["selectbox", $iblockCarProps->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_IB_CARS_PROP_COLOR",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS_PROP_COLOR"),
+            null,
+            ["selectbox", $iblockCarProps->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_IB_CARS_PROP_VIN",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS_PROP_VIN"),
+            null,
+            ["selectbox", $iblockCarProps->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_IB_CARS_PROP_CONTACT",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS_PROP_CONTACT"),
+            null,
+            ["selectbox", $iblockCarProps->getData()]
         ],
 
     ]
@@ -74,8 +142,9 @@ $arMainPropsTab = [
 
 $aTabs = [
     $arMainPropsTab,
+    $arCarPropsTab,
     [
-        "DIV" => "edit2",
+        "DIV" => "edit3",
         "TAB" => Loc::getMessage("MAIN_TAB_RIGHTS"),
         "TITLE" => Loc::getMessage("MAIN_TAB_TITLE_RIGHTS")
     ],
