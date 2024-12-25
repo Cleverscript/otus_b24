@@ -146,7 +146,15 @@ class otus_autoservice extends CModule
 
         $this->eventManager->registerEventHandler(
             'iblock',
-            'OnBeforeIBlockElementAdd', //OnStartIBlockElementAdd
+            'OnStartIBlockElementAdd',
+            $this->MODULE_ID,
+            '\\Otus\\Autoservice\\Handlers\\CarHandler',
+            'onStartAdd'
+        );
+
+        $this->eventManager->registerEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementAdd',
             $this->MODULE_ID,
             '\\Otus\\Autoservice\\Handlers\\CarHandler',
             'beforeAdd'
@@ -177,6 +185,22 @@ class otus_autoservice extends CModule
             $this->MODULE_ID,
             '\\Otus\\Autoservice\\Handlers\\TabHandler',
             'addTabs'
+        );
+
+        $this->eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnStartIBlockElementAdd',
+            $this->MODULE_ID,
+            '\\Otus\\Autoservice\\Handlers\\CarHandler',
+            'onStartAdd'
+        );
+
+        $this->eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementAdd',
+            $this->MODULE_ID,
+            '\\Otus\\Autoservice\\Handlers\\CarHandler',
+            'beforeAdd'
         );
 
         $this->eventManager->unRegisterEventHandler(

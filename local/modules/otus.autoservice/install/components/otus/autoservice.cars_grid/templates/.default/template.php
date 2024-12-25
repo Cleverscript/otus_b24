@@ -27,7 +27,7 @@ $APPLICATION->IncludeComponent(
         "AJAX_MODE" => "N",
         "AJAX_OPTION_JUMP" => "N",
         "AJAX_OPTION_HISTORY" => "N",
-        "SHOW_ROW_CHECKBOXES" => $arResult['SHOW_ROW_CHECKBOXES'],
+        "SHOW_ROW_CHECKBOXES" => $arResult['SHOW_ROW_CHECKBOXES'] == 'Y',
         "SHOW_SELECTED_COUNTER" => true,
         "SHOW_PAGESIZE" => true,
         "TOTAL_ROWS_COUNT" => $arResult['TOTAL_ROWS_COUNT'],

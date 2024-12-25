@@ -80,10 +80,6 @@ class CarGrid extends CBitrixComponent
                 'ALLOW_SORT' => true,
             ];
 
-            pLog([__METHOD__ => [
-                $this->arResult
-            ]]);
-
             $this->IncludeComponentTemplate();
 
         } catch (\Throwable $e) {

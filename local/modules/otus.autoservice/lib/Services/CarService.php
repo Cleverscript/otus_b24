@@ -9,7 +9,6 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Entity\Query\Join;
 use Bitrix\Main\ORM\Fields\Relations\Reference;
 use Otus\Autoservice\Traits\ModuleTrait;
-use Otus\Autoservice\Services\HighloadBlockService;
 
 Loc::loadMessages(__FILE__);
 
@@ -24,7 +23,7 @@ class CarService
     {
         $this->includeModules();
 
-        $this->iblockId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_IB_CARS");
+        $this->iblockId = ModuleService::getInstance()->getPropVal('OTUS_AUTOSERVICE_IB_CARS');
 
         $this->highloadBlockService = new HighloadBlockService;
     }
@@ -130,6 +129,16 @@ class CarService
         return $result;
     }
 
+    public function isExists(string $vin): bool
+    {
+        $entity = Iblock::wakeUp($this->iblockId)->getEntityDataClass();
+
+        return $entity::query()
+            ->where('VIN.VALUE', $vin)
+            ->exec()
+            ->getSelectedRowsCount() > 0;
+    }
+
     private function includeModules(): void
     {
         if (!Loader::includeModule('highloadblock')) {
@@ -139,5 +148,4 @@ class CarService
             ));
         }
     }
-
 }

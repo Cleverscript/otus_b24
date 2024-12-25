@@ -2,11 +2,12 @@
 
 namespace Otus\Autoservice\Handlers;
 
-use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Traits\HandlerTrait;
 use Otus\Autoservice\Traits\ModuleTrait;
 use Otus\Autoservice\Helpers\IblockHelper;
+use Otus\Autoservice\Services\CarService;
+use Otus\Autoservice\Services\ModuleService;
 use Otus\Autoservice\Services\HighloadBlockService;
 
 Loc::loadMessages(__FILE__);
@@ -16,10 +17,19 @@ class CarHandler
     use HandlerTrait;
     use ModuleTrait;
 
-    public static function beforeAdd(&$arFields)
+    /**
+     * Хендлер метод для события OnStartIBlockElementAdd
+     * в котором подменяется NAME эл-та (автомобиля) введенное
+     * пользователем в форме создания, на сформированный из значений
+     * указанных в св-вах "Марка", "Модель" и "VIN"
+     * @param $arFields
+     * @return void
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
+    public static function onStartAdd(&$arFields)
     {
-        dump($arFields);
-
         if (!IblockHelper::isAllowIblock(null, self::$moduleId, $arFields['IBLOCK_ID'])) {
             return;
         }
@@ -29,22 +39,13 @@ class CarHandler
 
         $itemName = [];
         $propertyValues = $arFields['PROPERTY_VALUES'];
+
         $hlBlockService = new HighloadBlockService;
+        $moduleService = ModuleService::getInstance();
 
-        $carPropBrandId = Option::get(self::$moduleId, 'OTUS_AUTOSERVICE_IB_CARS_PROP_BRAND');
-        if (!$carPropBrandId) {
-            throw new \Exception(Loc::loadMessages('OTUS_AUTOSERVICE_IB_CARS_PROP_BRAND_NULL'));
-        }
-
-        $carPropModelId = Option::get(self::$moduleId, 'OTUS_AUTOSERVICE_IB_CARS_PROP_MODEL');
-        if (!$carPropModelId) {
-            throw new \Exception(Loc::loadMessages('OTUS_AUTOSERVICE_IB_CARS_PROP_MODEL_NULL'));
-        }
-
-        $carPropVinId = Option::get(self::$moduleId, 'OTUS_AUTOSERVICE_IB_CARS_PROP_VIN');
-        if (!$carPropVinId) {
-            throw new \Exception(Loc::loadMessages('OTUS_AUTOSERVICE_IB_CARS_PROP_VIN_NULL'));
-        }
+        $carPropBrandId = $moduleService->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_BRAND');
+        $carPropModelId = $moduleService->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_MODEL');
+        $carPropVinId = $moduleService->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_VIN');
 
         if (!empty($propertyValues[$carPropBrandId])) {
             $brand = $hlBlockService->getHLItemByXmlId(
@@ -69,21 +70,40 @@ class CarHandler
 
         if (!empty($itemName)) {
             $arFields['NAME'] = implode(' ', $itemName);
-
-            dump($itemName);
         }
 
-        dump($arFields);
+        self::$handlerDisallow = false;
+    }
 
-        /*(new \CIBlockElement)->Update(
-            $itemId,
-            [
-                'NAME' => "---"
-            ]
-        );*/
+    public static function beforeAdd(&$arFields)
+    {
+        if (!IblockHelper::isAllowIblock(null, self::$moduleId, $arFields['IBLOCK_ID'])) {
+            return;
+        }
+
+        if (self::$handlerDisallow) return;
+        self::$handlerDisallow = true;
+
+        $propertyValues = $arFields['PROPERTY_VALUES'];
+
+        $carPropVinId = ModuleService::getInstance()->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_VIN');
+
+        if (!empty($propertyValues[$carPropVinId])) {
+           $vin = current($propertyValues[$carPropVinId])['VALUE'];
+
+           if ((new CarService)->isExists($vin)) {
+               global $APPLICATION;
+
+               $APPLICATION->ThrowException(
+                   Loc::getMessage('OTUS_AUTOSERVICE_VIN_CODE_IS_EXISTS',
+                       ['#VIN#' => $vin]
+                   )
+               );
+
+               return false;
+           }
+        }
 
         self::$handlerDisallow = false;
-
-        return $arFields;
     }
 }

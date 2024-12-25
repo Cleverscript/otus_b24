@@ -64,7 +64,7 @@ class TabHandler
                     'params' => [
                         "SET_PAGE_TITLE" => "N",
                         "COMPONENT_TEMPLATE" => ".default",
-                        "SHOW_ROW_CHECKBOXES" => "Y",
+                        "SHOW_ROW_CHECKBOXES" => "N",
                         "NUM_PAGE" => "5",
                         "CACHE_TYPE" => "A",
                         "CACHE_TIME" => "86400",
