@@ -124,18 +124,11 @@ class otus_autoservice extends CModule
     function UnInstallFiles()
     {
         Directory::deleteDirectory($_SERVER["DOCUMENT_ROOT"] . '/local/components/' . str_replace('.', '/', $this->MODULE_ID) . '.cars_grid');
+        Directory::deleteDirectory($_SERVER["DOCUMENT_ROOT"] . '/local/components/' . str_replace('.', '/', $this->MODULE_ID) . '.car_show');
     }
 
     function InstallEvents()
     {
-        $this->eventManager->registerEventHandler(
-            'main',
-            'OnEpilog',
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\SidePanelHandler',
-            'handleSidepanelLinks'
-        );
-
         $this->eventManager->registerEventHandler(
             'crm',
             'onEntityDetailsTabsInitialized',
@@ -171,14 +164,6 @@ class otus_autoservice extends CModule
 
     function UnInstallEvents()
     {
-        $this->eventManager->unRegisterEventHandler(
-            'main',
-            'OnEpilog',
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\SidePanelHandler',
-            'handleSidepanelLinks'
-        );
-
         $this->eventManager->unRegisterEventHandler(
             'crm',
             'onEntityDetailsTabsInitialized',

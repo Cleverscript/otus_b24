@@ -129,9 +129,23 @@ class CarGrid extends CBitrixComponent
         }
 
         foreach ($rows as $row) {
+            $params = 'CAR_ID=' . $row['ID'] . '&site=' . \SITE_ID . '&' . \bitrix_sessid_get();
+
             $data[] = [
                 'id' => $row['ID'],
-                'columns' => $row
+                'columns' => $row,
+                'actions' => [
+                    [
+                        'text' => Loc::getMessage('OTUS_AUTOSERVICE_CAR_SHOW_HISTORY'),
+                        'default' => true,
+                        'onclick' => "BX.SidePanel.Instance.open('/local/components/otus/autoservice.car_show/lazyload.ajax.php?{$params}', {
+                            allowChangeHistory: false,
+                            animationDuration: 100,
+                            width: 1100,
+                            cacheable: false,
+                        })",
+                    ],
+                ]
             ];
         }
 

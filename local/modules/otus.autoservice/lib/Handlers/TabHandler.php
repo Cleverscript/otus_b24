@@ -79,16 +79,16 @@ class TabHandler
 
     private static function addLeadTabs($entityId, $tabs): array
     {
-        return [];
+        return $tabs;
     }
 
     private static function addCompanyTabs($entityId, $tabs): array
     {
-        return [];
+        return $tabs;
     }
 
     private static function addDealTabs($entityId, $tabs): array
     {
-        return [];
+        return $tabs;
     }
 }

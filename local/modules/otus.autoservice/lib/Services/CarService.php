@@ -47,7 +47,7 @@ class CarService
             ->getSelectedRowsCount();
     }
 
-    public function getCars(int $contactId, int $offset = 0, int $limit = 5)
+    public function getCars(int $contactId, int $offset = 0, int $limit = 5): array
     {
         if (!$contactId) {
             return 0;
@@ -120,7 +120,7 @@ class CarService
                 'MODEL' => $item->get('MODEL_ITEM')->get('UF_NAME'),
                 'COLOR' => $item->get('COLOR_ITEM')->get('UF_NAME'),
                 'RELEASE_DATE' => substr($item->get('RELEASE_DATE')->getValue(), 0, 4),
-                'MILIAGE' => (int) $item->get('MILIAGE')->getValue(),
+                'MILIAGE' => (int)$item->get('MILIAGE')->getValue(),
                 'VIN' => $item->get('VIN')->getValue(),
                 'CONTACT_ID' => $item->get('CONTACT')->getValue()
             ];
@@ -134,9 +134,18 @@ class CarService
         $entity = Iblock::wakeUp($this->iblockId)->getEntityDataClass();
 
         return $entity::query()
-            ->where('VIN.VALUE', $vin)
-            ->exec()
-            ->getSelectedRowsCount() > 0;
+                ->where('VIN.VALUE', $vin)
+                ->exec()
+                ->getSelectedRowsCount() > 0;
+    }
+
+    public function isValidVin(string $vin): bool
+    {
+        if (strlen($vin) != 17) {
+            return false;
+        }
+
+        return true;
     }
 
     private function includeModules(): void
@@ -144,7 +153,7 @@ class CarService
         if (!Loader::includeModule('highloadblock')) {
             throw new \Exception(Loc::getMessage(
                 "OTUS_AUTOSERVICE_MODULE_IS_NOT_INSTALLED",
-                ['#MODULE_ID#' => 'otus.autoservice']
+                ['#MODULE_ID#' => 'highloadblock']
             ));
         }
     }

@@ -8,6 +8,7 @@ use Otus\Autoservice\Traits\ModuleTrait;
 use Otus\Autoservice\Helpers\IblockHelper;
 use Otus\Autoservice\Services\CarService;
 use Otus\Autoservice\Services\ModuleService;
+use Otus\Autoservice\Services\ContactService;
 use Otus\Autoservice\Services\HighloadBlockService;
 
 Loc::loadMessages(__FILE__);
@@ -42,7 +43,9 @@ class CarHandler
 
         $hlBlockService = new HighloadBlockService;
         $moduleService = ModuleService::getInstance();
+        $contactService = new ContactService;
 
+        $carPropContactId = $moduleService->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_CONTACT');
         $carPropBrandId = $moduleService->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_BRAND');
         $carPropModelId = $moduleService->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_MODEL');
         $carPropVinId = $moduleService->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_VIN');
@@ -61,11 +64,19 @@ class CarHandler
                 current($propertyValues[$carPropModelId])['VALUE'],
                 $hlBlockService->getEntityHLModel()
             )['UF_NAME'];
+
             $itemName[] = $model;
         }
 
         if (!empty($propertyValues[$carPropVinId])) {
-            $itemName[] = current($propertyValues[$carPropVinId])['VALUE'];
+            $itemName[] = strtoupper(current($propertyValues[$carPropVinId])['VALUE']);
+        }
+
+        if (!empty($propertyValues[$carPropContactId])) {
+            $contactId = (int) current($propertyValues[$carPropContactId])['VALUE'];
+            if ($contactName = trim($contactService->getFullName($contactId))) {
+                $itemName[] = "[{$contactName}]";
+            }
         }
 
         if (!empty($itemName)) {
@@ -84,16 +95,28 @@ class CarHandler
         if (self::$handlerDisallow) return;
         self::$handlerDisallow = true;
 
+        global $APPLICATION;
+
         $propertyValues = $arFields['PROPERTY_VALUES'];
+
+        $carService = new CarService;
 
         $carPropVinId = ModuleService::getInstance()->getPropVal('OTUS_AUTOSERVICE_IB_CARS_PROP_VIN');
 
         if (!empty($propertyValues[$carPropVinId])) {
-           $vin = current($propertyValues[$carPropVinId])['VALUE'];
+           $vin = strtoupper(current($propertyValues[$carPropVinId])['VALUE']);
 
-           if ((new CarService)->isExists($vin)) {
-               global $APPLICATION;
+            if (!$carService->isValidVin($vin)) {
+                $APPLICATION->ThrowException(
+                    Loc::getMessage('OTUS_AUTOSERVICE_VIN_CODE_NOT_VALID',
+                        ['#VIN#' => $vin]
+                    )
+                );
 
+                return false;
+            }
+
+           if ($carService->isExists($vin)) {
                $APPLICATION->ThrowException(
                    Loc::getMessage('OTUS_AUTOSERVICE_VIN_CODE_IS_EXISTS',
                        ['#VIN#' => $vin]
