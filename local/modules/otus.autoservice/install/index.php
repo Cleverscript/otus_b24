@@ -127,74 +127,37 @@ class otus_autoservice extends CModule
         Directory::deleteDirectory($_SERVER["DOCUMENT_ROOT"] . '/local/components/' . str_replace('.', '/', $this->MODULE_ID) . '.car_show');
     }
 
+    protected function getEventsArray()
+    {
+        return [
+            ['iblock', 'OnStartIBlockElementAdd', '\\Otus\\Autoservice\\Handlers\\CarHandler', 'onStartAdd'],
+            ['iblock', 'OnBeforeIBlockElementAdd', '\\Otus\\Autoservice\\Handlers\\CarHandler', 'beforeAdd'],
+            ['iblock', 'OnIBlockPropertyBuildList', '\\Otus\\Autoservice\\Handlers\\HlblockPropertyBuildListHandler', 'GetUserTypeDescription'],
+
+            ['crm', 'onEntityDetailsTabsInitialized', '\\Otus\\Autoservice\\Handlers\\TabHandler', 'addTabs'],
+            ['crm', 'OnBeforeCrmDealAdd', '\\Otus\\Autoservice\\Handlers\\DealHandler', 'beforeAdd'],
+            ['crm', 'OnAfterCrmDealAdd', '\\Otus\\Autoservice\\Handlers\\DealHandler', 'afterAdd'],
+        ];
+    }
+
     function InstallEvents()
     {
-        $this->eventManager->registerEventHandler(
-            'crm',
-            'onEntityDetailsTabsInitialized',
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\TabHandler',
-            'addTabs'
-        );
-
-        $this->eventManager->registerEventHandler(
-            'iblock',
-            'OnStartIBlockElementAdd',
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\CarHandler',
-            'onStartAdd'
-        );
-
-        $this->eventManager->registerEventHandler(
-            'iblock',
-            'OnBeforeIBlockElementAdd',
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\CarHandler',
-            'beforeAdd'
-        );
-
-        $this->eventManager->registerEventHandler(
-            "iblock",
-            "OnIBlockPropertyBuildList",
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\HlblockPropertyBuildListHandler',
-            "GetUserTypeDescription"
-        );
+        foreach ($this->getEventsArray() as $row)
+        {
+            list($module, $event_name, $class, $function, $sort) = $row;
+            $this->eventManager->RegisterEventHandler($module, $event_name, $this->MODULE_ID, $class, $function, $sort);
+        }
+        return true;
     }
 
     function UnInstallEvents()
     {
-        $this->eventManager->unRegisterEventHandler(
-            'crm',
-            'onEntityDetailsTabsInitialized',
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\TabHandler',
-            'addTabs'
-        );
-
-        $this->eventManager->unRegisterEventHandler(
-            'iblock',
-            'OnStartIBlockElementAdd',
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\CarHandler',
-            'onStartAdd'
-        );
-
-        $this->eventManager->unRegisterEventHandler(
-            'iblock',
-            'OnBeforeIBlockElementAdd',
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\CarHandler',
-            'beforeAdd'
-        );
-
-        $this->eventManager->unRegisterEventHandler(
-            "iblock",
-            "OnIBlockPropertyBuildList",
-            $this->MODULE_ID,
-            '\\Otus\\Autoservice\\Handlers\\HlblockPropertyBuildListHandler',
-            "GetUserTypeDescription"
-        );
+        foreach ($this->getEventsArray() as $row)
+        {
+            list($module, $event_name, $class, $function, ) = $row;
+            $this->eventManager->UnRegisterEventHandler($module, $event_name, $this->MODULE_ID, $class, $function);
+        }
+        return true;
     }
 
     public function InstallDB()

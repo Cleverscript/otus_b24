@@ -184,6 +184,13 @@ class HlblockPropertyBuildListHandler
      */
     public static function GetPublicViewHTML($arProperty, $arValue, $strHTMLControlName)
     {
+        pLog([__METHOD__ => [$arProperty, $arValue, $strHTMLControlName]]);
+
+        if (empty($arValue['VALUE'])) {
+            return '';
+        }
+
+        // TODO: нужно ли это вообще?
         $propVal = self::preparePropVal($arValue['VALUE']);
 
         return $propVal['NAME'];
@@ -195,6 +202,7 @@ class HlblockPropertyBuildListHandler
         return "[{$propVal['ID']}] {$propVal['NAME']}";
     }
 
+    // TODO: нужно ли это вообще?
     public static function preparePropVal(string $val)
     {
         $iblBookingProcedureId = Option::get(self::$moduleId, 'OTUS_BOOKINGFIELD_IBLOCK_BOOKING');

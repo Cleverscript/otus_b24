@@ -129,6 +129,29 @@ class CarService
         return $result;
     }
 
+    /**
+     * Возвращает название автомобиля
+     * @param int $id
+     * @return string
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
+    public function getCarName(int $id): string
+    {
+        if (!$id) {
+            return 0;
+        }
+
+        $entity = Iblock::wakeUp($this->iblockId)->getEntityDataClass();
+
+        return $entity::query()
+            ->where('ID', $id)
+            ->addOrder('ID', 'DESC')
+            ->addSelect('NAME')
+            ->fetch()['NAME'];
+    }
+
     public function isExists(string $vin): bool
     {
         $entity = Iblock::wakeUp($this->iblockId)->getEntityDataClass();

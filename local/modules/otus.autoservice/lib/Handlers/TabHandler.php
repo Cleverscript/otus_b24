@@ -5,7 +5,6 @@ namespace Otus\Autoservice\Handlers;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Event;
 use Bitrix\Main\EventResult;
-use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Services\CarService;
 

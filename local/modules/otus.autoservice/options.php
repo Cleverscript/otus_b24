@@ -1,9 +1,9 @@
 <?php
-use Bitrix\Main;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\HttpApplication;
+use Otus\Autoservice\Services\DealService;
 use Otus\Autoservice\Services\IblockService;
 use Otus\Autoservice\Services\HighloadBlockService;
 use Otus\Clinic\Utils\BaseUtils;
@@ -45,11 +45,28 @@ if ($iblockCarId = Option::get($module_id, 'OTUS_AUTOSERVICE_IB_CARS')) {
     $iblockCarProps = $iblockService->getIblockProperties();
 }
 
+$dealService = new DealService();
+$arDealCategories = $dealService->getCategories();
+
+$dealPropsArr = [];
+$dealProps = $dealService->getDealProps();
+if ($dealProps->isSuccess()) {
+    foreach ($dealProps->getData() as $dealProp) {
+        $dealPropsArr[$dealProp['CODE']] = '[' .$dealProp['CODE'] . '] ' . $dealProp['NAME'];
+    }
+}
+
 $arMainPropsTab = [
     "DIV" => "edit1",
     "TAB" => Loc::getMessage("OTUS_AUTOSERVICE_MAIN_TAB_SETTINGS"),
     "TITLE" => Loc::getMessage("OTUS_AUTOSERVICE_MAIN_TAB_SETTINGS_TITLE"),
     "OPTIONS" => [
+        [
+            "OTUS_AUTOSERVICE_DEAL_CATEGORY",
+            Loc::getMessage("OTUS_AUTOSERVICE_DEAL_CATEGORY"),
+            null,
+            ["selectbox", $arDealCategories]
+        ],
 
         [
             "OTUS_AUTOSERVICE_IB_CARS",
@@ -140,11 +157,28 @@ $arCarPropsTab = [
     ]
 ];
 
+$dealPropsTab = [
+    "DIV" => "edit3",
+    "TAB" => Loc::getMessage("OTUS_AUTOSERVICE_DEAL_PROPS_TAB_SETTINGS"),
+    "TITLE" => Loc::getMessage("OTUS_AUTOSERVICE_DEAL_PROPS_TAB_SETTINGS"),
+    "OPTIONS" => [
+
+        [
+            "OTUS_AUTOSERVICE_DEAL_PROP_CAR",
+            Loc::getMessage("OTUS_AUTOSERVICE_DEAL_PROP_CAR"),
+            null,
+            ["selectbox", $dealPropsArr]
+        ],
+
+    ]
+];
+
 $aTabs = [
     $arMainPropsTab,
     $arCarPropsTab,
+    $dealPropsTab,
     [
-        "DIV" => "edit3",
+        "DIV" => "edit4",
         "TAB" => Loc::getMessage("MAIN_TAB_RIGHTS"),
         "TITLE" => Loc::getMessage("MAIN_TAB_TITLE_RIGHTS")
     ],
