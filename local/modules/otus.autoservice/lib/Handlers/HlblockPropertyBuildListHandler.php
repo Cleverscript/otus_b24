@@ -2,9 +2,7 @@
 
 namespace Otus\Autoservice\Handlers;
 
-use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
-use Bitrix\Main\Engine\CurrentUser;
 use Otus\Autoservice\Traits\ModuleTrait;
 use Otus\Autoservice\Services\HighloadBlockService;
 
@@ -184,37 +182,16 @@ class HlblockPropertyBuildListHandler
      */
     public static function GetPublicViewHTML($arProperty, $arValue, $strHTMLControlName)
     {
-        pLog([__METHOD__ => [$arProperty, $arValue, $strHTMLControlName]]);
-
         if (empty($arValue['VALUE'])) {
             return '';
         }
 
-        // TODO: нужно ли это вообще?
-        $propVal = self::preparePropVal($arValue['VALUE']);
-
-        return $propVal['NAME'];
+        return $arValue['VALUE'];
     }
 
     public static function GetAdminListViewHTML($arProperty, $arValue, $strHTMLControlName)
     {
-        $propVal = self::preparePropVal($arValue['VALUE']);
-        return "[{$propVal['ID']}] {$propVal['NAME']}";
-    }
-
-    // TODO: нужно ли это вообще?
-    public static function preparePropVal(string $val)
-    {
-        $iblBookingProcedureId = Option::get(self::$moduleId, 'OTUS_BOOKINGFIELD_IBLOCK_BOOKING');
-
-        $explVal = explode(';', $val);
-
-        return [
-            'ID' => current($explVal),
-            'NAME' => array_pop($explVal),
-            'FIO' => CurrentUser::get()->getFullName() ?: CurrentUser::get()->getLogin(),
-            'IBLOCK_ID' => $iblBookingProcedureId,
-        ];
+        return $arValue['VALUE'];
     }
 
     public static function GetSearchContent($arProperty, $value, $strHTMLControlName)
@@ -283,4 +260,3 @@ class HlblockPropertyBuildListHandler
         return $strResult;
     }
 }
-

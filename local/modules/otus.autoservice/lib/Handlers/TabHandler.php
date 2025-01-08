@@ -26,12 +26,29 @@ class TabHandler
         );
 
         if ($canUpdateDeal) {
-            $tabs = match (true) {
-                $entityTypeID === \CCrmOwnerType::Contact => self::addContactTabs($entityId, $tabs),
-                $entityTypeID === \CCrmOwnerType::Deal => self::addDealTabs($entityId, $tabs),
-                $entityTypeID === \CCrmOwnerType::Lead => self::addLeadTabs($entityId, $tabs),
-                $entityTypeID === \CCrmOwnerType::Company => self::addCompanyTabs($entityId, $tabs)
-            };
+
+            switch ($entityTypeID) {
+                case \CCrmOwnerType::Contact: {
+                    $tabs = self::addContactTabs($entityId, $tabs);
+                    break;
+                }
+                case \CCrmOwnerType::Deal: {
+                    $tabs = self::addDealTabs($entityId, $tabs);
+                    break;
+                }
+                case \CCrmOwnerType::Lead: {
+                    $tabs = self::addLeadTabs($entityId, $tabs);
+                    break;
+                }
+                case \CCrmOwnerType::Company: {
+                    $tabs = self::addCompanyTabs($entityId, $tabs);
+                    break;
+                }
+                default: {
+                    $tabs = $tabs;
+                    break;
+                }
+            }
         }
 
         return new EventResult(EventResult::SUCCESS, [

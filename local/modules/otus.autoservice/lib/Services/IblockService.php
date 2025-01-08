@@ -22,14 +22,14 @@ class IblockService
         $this->iblockId = $iblockId;
     }
 
-    public static function getIblocks(): Result
+    public static function getIblocks(string $type): Result
     {
         $data = [];
         $result = new Result;
 
         $rows = IblockTable::getList([
             'filter' => [
-                'IBLOCK_TYPE_ID' => 'lists',
+                'IBLOCK_TYPE_ID' => $type,
             ],
             'select' => ['ID', 'NAME']
         ])->fetchAll();

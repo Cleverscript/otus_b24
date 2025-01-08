@@ -1,12 +1,12 @@
 <?php
 use Bitrix\Main\Loader;
-use Otus\Customtab\Models;
 use Bitrix\Main\Entity\Base;
 use Bitrix\Main\IO\Directory;
 use Bitrix\Main\Application;
 use Bitrix\Main\EventManager;
 use Bitrix\Main\ModuleManager;
 use Bitrix\Main\Localization\Loc;
+use Otus\Autoservice\Tables\BpCatalogProductsTable;
 
 Loc::loadMessages(__FILE__);
 
@@ -160,13 +160,54 @@ class otus_autoservice extends CModule
         return true;
     }
 
+    public function InstallAgents()
+    {
+        CAgent::AddAgent("\Otus\Autoservice\Agents\ActualizeQuantityAgent::run();", $this->MODULE_ID, "N", 60, "", "Y", "");
+        return true;
+    }
+
+    function UnInstallAgents()
+    {
+        CAgent::RemoveModuleAgents($this->MODULE_ID);
+        return true;
+    }
+
+    private function getEntities()
+    {
+        return [
+            '\\' . BpCatalogProductsTable::class
+        ];
+    }
+
     public function InstallDB()
     {
+        Loader::includeModule($this->MODULE_ID);
+
+        $entities = $this->getEntities();
+
+        foreach ($entities as $entity) {
+            if (!Application::getConnection($entity::getConnectionName())->isTableExists($entity::getTableName())) {
+                Base::getInstance($entity)->createDbTable();
+            }
+        }
+
         return true;
     }
 
     public function UninstallDB()
     {
+        Loader::includeModule($this->MODULE_ID);
+
+        $connection = Application::getConnection();
+
+        $entities = $this->getEntities();
+
+        foreach ($entities as $entity) {
+            if (Application::getConnection($entity::getConnectionName())->isTableExists($entity::getTableName())) {
+                $connection->dropTable($entity::getTableName());
+            }
+        }
+
         return true;
     }
 
@@ -187,6 +228,8 @@ class otus_autoservice extends CModule
 
             $this->InstallEvents();
 
+            $this->InstallAgents();
+
             return true;
 
         } else {
@@ -196,10 +239,12 @@ class otus_autoservice extends CModule
 
     function DoUninstall()
     {
-        ModuleManager::unRegisterModule($this->MODULE_ID);
         $this->UnInstallEvents();
+        $this->UnInstallAgents();
         $this->UnInstallFiles();
         $this->UninstallDB();
+
+        ModuleManager::unRegisterModule($this->MODULE_ID);
 
         return true;
     }

@@ -45,6 +45,8 @@ class  DealHandler
 
                    CIMNotify::Add($fields);
                }
+
+               return false;
            }
         }
     }

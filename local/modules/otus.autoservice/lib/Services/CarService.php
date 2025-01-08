@@ -4,7 +4,6 @@ namespace Otus\Autoservice\Services;
 use Bitrix\Main\Loader;
 use Bitrix\Iblock\Iblock;
 use Bitrix\Crm\ContactTable;
-use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Entity\Query\Join;
 use Bitrix\Main\ORM\Fields\Relations\Reference;

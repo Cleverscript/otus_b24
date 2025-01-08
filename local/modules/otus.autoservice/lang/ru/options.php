@@ -4,6 +4,7 @@ $MESS['OTUS_AUTOSERVICE_MAIN_TAB_SETTINGS_TITLE'] = 'Главные настро
 $MESS['OTUS_AUTOSERVICE_DEAL_CATEGORY'] = 'Воронка сделки';
 $MESS['OTUS_AUTOSERVICE_DEAL_CATEGORY_DEFAULT'] = 'Общая';
 $MESS['OTUS_AUTOSERVICE_IB_CARS'] = 'Инфоблок с автомобилями';
+$MESS['OTUS_AUTOSERVICE_IB_PARTS'] = 'Инфоблок с запчастями';
 $MESS['OTUS_AUTOSERVICE_HL_CAR_BRAND'] = 'Справочник брендов';
 $MESS['OTUS_AUTOSERVICE_HL_CAR_MODEL'] = 'Справочник моделей';
 $MESS['OTUS_AUTOSERVICE_HL_CAR_COLOR'] = 'Справочник цветов';

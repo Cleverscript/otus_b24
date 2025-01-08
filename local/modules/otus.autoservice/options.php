@@ -21,10 +21,16 @@ $request = HttpApplication::getInstance()->getContext()->getRequest();
 
 $defaultOptions = Option::getDefaults($module_id);
 
-$iblocks = IblockService::getIblocks();
+$iblocksLists = IblockService::getIblocks('lists');
 
-if (!$iblocks->isSuccess()) {
-    CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocks));
+if (!$iblocksLists->isSuccess()) {
+    CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocksLists));
+}
+
+$iblocksCatalog = IblockService::getIblocks('CRM_PRODUCT_CATALOG');
+
+if (!$iblocksCatalog->isSuccess()) {
+    CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocksCatalog));
 }
 
 $hlblocks = (new HighloadBlockService)->getList();
@@ -72,7 +78,14 @@ $arMainPropsTab = [
             "OTUS_AUTOSERVICE_IB_CARS",
             Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS"),
             null,
-            ["selectbox", $iblocks->getData()]
+            ["selectbox", $iblocksLists->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_IB_PARTS",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_PARTS"),
+            null,
+            ["selectbox", $iblocksCatalog->getData()]
         ],
 
         [
