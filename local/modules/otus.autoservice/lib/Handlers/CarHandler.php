@@ -1,11 +1,11 @@
 <?php
-
 namespace Otus\Autoservice\Handlers;
 
+use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Traits\HandlerTrait;
 use Otus\Autoservice\Traits\ModuleTrait;
-use Otus\Autoservice\Helpers\IblockHelper;
+use Otus\Autoservice\Traits\IblockHandlerTrait;
 use Otus\Autoservice\Services\CarService;
 use Otus\Autoservice\Services\ModuleService;
 use Otus\Autoservice\Services\ContactService;
@@ -17,6 +17,9 @@ class CarHandler
 {
     use HandlerTrait;
     use ModuleTrait;
+    use IblockHandlerTrait;
+
+    protected static int $entityIblockId;
 
     /**
      * Хендлер метод для события OnStartIBlockElementAdd
@@ -31,7 +34,9 @@ class CarHandler
      */
     public static function onStartAdd(&$arFields)
     {
-        if (!IblockHelper::isAllowIblock(null, self::$moduleId, $arFields['IBLOCK_ID'])) {
+        self::$entityIblockId = Option::get(self::$moduleId, 'OTUS_AUTOSERVICE_IB_CARS');
+
+        if (!self::isAllowIblock(null, $arFields['IBLOCK_ID'])) {
             return;
         }
 
@@ -86,9 +91,20 @@ class CarHandler
         self::$handlerDisallow = false;
     }
 
+    /**
+     * Проверяет VIN код автомобиля на корректность
+     * и на уникальность по автомобилям
+     * @param $arFields
+     * @return false|void
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function beforeAdd(&$arFields)
     {
-        if (!IblockHelper::isAllowIblock(null, self::$moduleId, $arFields['IBLOCK_ID'])) {
+        self::$entityIblockId = Option::get(self::$moduleId, 'OTUS_AUTOSERVICE_IB_CARS');
+
+        if (!self::isAllowIblock(null, $arFields['IBLOCK_ID'])) {
             return;
         }
 

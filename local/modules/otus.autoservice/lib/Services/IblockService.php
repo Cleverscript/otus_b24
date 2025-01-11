@@ -22,6 +22,24 @@ class IblockService
         $this->iblockId = $iblockId;
     }
 
+    /**
+     * Возвращает ID инфоблока эл-нта
+     * @param int $elementId
+     * @return mixed
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
+    public static function getIblockIdByElement(int $elementId)
+    {
+        return ElementTable::getList([
+            'select' => [
+                'IBLOCK_ID',
+            ],
+            'filter' => ['ID' => $elementId],
+        ])->fetch()['IBLOCK_ID'];
+    }
+
     public static function getIblocks(string $type): Result
     {
         $data = [];

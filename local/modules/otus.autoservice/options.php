@@ -82,6 +82,13 @@ $arMainPropsTab = [
         ],
 
         [
+            "OTUS_AUTOSERVICE_IB_REQUESTS",
+            Loc::getMessage("OTUS_AUTOSERVICE_IB_REQUESTS"),
+            null,
+            ["selectbox", $iblocksLists->getData()]
+        ],
+
+        [
             "OTUS_AUTOSERVICE_IB_PARTS",
             Loc::getMessage("OTUS_AUTOSERVICE_IB_PARTS"),
             null,

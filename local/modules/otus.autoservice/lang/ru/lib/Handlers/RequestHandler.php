@@ -1,0 +1,2 @@
+<?php
+$MESS['OTUS_AUTOSERVICE_REQUEST_NAME_DEFAULT'] = 'Запрос от #USER_NAME#';
