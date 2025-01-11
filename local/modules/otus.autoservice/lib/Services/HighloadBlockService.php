@@ -16,6 +16,11 @@ class HighloadBlockService
 {
     use ModuleTrait;
 
+    public int $entityHLBrandId;
+    public int $entityHLModelId;
+    public int $entityHLColorId;
+    public int $entityHLProdGropId;
+
     public function __construct()
     {
         $this->includeModules();
@@ -23,6 +28,7 @@ class HighloadBlockService
         $this->entityHLBrandId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_HL_CAR_BRAND");
         $this->entityHLModelId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_HL_CAR_MODEL");
         $this->entityHLColorId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_HL_CAR_COLOR");
+        $this->entityHLProdGropId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_HL_PROD_GROUPS");
     }
 
     public function getList(array $filter = []): Result

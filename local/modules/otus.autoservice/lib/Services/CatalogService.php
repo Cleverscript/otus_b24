@@ -5,6 +5,7 @@ use Bitrix\Main\Error;
 use Bitrix\Main\Result;
 use Bitrix\Main\Loader;
 use Bitrix\Iblock\Iblock;
+use Bitrix\Main\Type\DateTime;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Traits\ModuleTrait;
 use Otus\Autoservice\Tables\BpCatalogProductsTable;
@@ -70,20 +71,6 @@ class CatalogService
     }
 
     /**
-     * Изменяет отсаток товара
-     * @param int $productId
-     * @param int $qty
-     * @return void
-     */
-    private function updateQty(int $productId, int $qty): void
-    {
-        \CCatalogProduct::Update(
-            $productId,
-            ['QUANTITY' => $qty]
-        );
-    }
-
-    /**
      * Обрабатывает записи из таблицы бизнес процесса "Запрос на закупку"
      * в которой содержатся ID товаров и запрошенное кол-во для закупки,
      * с привязкой к ID запроса по которому запущен бизнес процесс
@@ -104,32 +91,58 @@ class CatalogService
         $products = array_column($rows, 'QTY', 'PROD_ID');
 
         foreach ($products as $prodId => $qty) {
-            if (\CCatalogSKU::IsExistOffers($prodId)) {
-                $dbOffers = \CCatalogSKU::getOffersList(
-                    [$prodId],
-                    0,
-                    [],
-                    ['ID', 'QUANTITY'],
-                    []
-                );
-
-                if (!empty($dbOffers[$prodId])) {
-                    foreach ($dbOffers[$prodId] as $offer) {
-                        $qty = $qty + $offer['QUANTITY'];
-
-                        $this->updateQty($offer['ID'], $qty);
-                    }
-                }
-            } else {
-                $qty = $qty + CCatalogProduct::GetByID($prodId)['QUANTITY'];
-
-                $this->updateQty($prodId, $qty);
-            }
+            $this->updateProductQty($prodId, $qty);
+            $this->updateProductTimestampt($prodId);
         }
 
         $this->deleteProductsInBp(array_column($rows, 'ID'));
 
         return $products;
+    }
+
+    /**
+     * Определяет есть ли у товара предложения
+     * и если да, то устанавливает им остаток остаток,
+     * а если нет, то устанавливает остатоку непосредственно товару
+     * @param int $prodId
+     * @param int $qty
+     * @return void
+     */
+    public function updateProductQty(int $prodId, int $qty, bool $sumUp = true): void
+    {
+        if (\CCatalogSKU::IsExistOffers($prodId)) {
+            $dbOffers = \CCatalogSKU::getOffersList(
+                [$prodId],
+                0,
+                [],
+                ['ID', 'QUANTITY'],
+                []
+            );
+
+            if (!empty($dbOffers[$prodId])) {
+                foreach ($dbOffers[$prodId] as $offer) {
+                    $qty = $sumUp ? $qty + $offer['QUANTITY'] : $qty;
+
+                    $this->updateQty($offer['ID'], $qty);
+                }
+            }
+        } else {
+            $qty = $sumUp ? $qty + CCatalogProduct::GetByID($prodId)['QUANTITY'] : $qty;
+
+            $this->updateQty($prodId, $qty);
+        }
+    }
+
+    public function updateProductTimestampt(int $prodId): void
+    {
+        (new \CIBlockElement)->Update(
+            $prodId,
+            [
+                "TIMESTAMP_X" =>  (new DateTime())
+            ],
+            false,
+            false
+        );
     }
 
     /**
@@ -175,6 +188,20 @@ class CatalogService
     }
 
     /**
+     * Устанавливает отсаток товару
+     * @param int $productId
+     * @param int $qty
+     * @return void
+     */
+    private function updateQty(int $productId, int $qty): void
+    {
+        \CCatalogProduct::Update(
+            $productId,
+            ['QUANTITY' => $qty]
+        );
+    }
+
+    /**
      * Формирует текст сообщения для уведомления о закупленных позициях
      * @param array $products
      * @return string|null
@@ -185,7 +212,7 @@ class CatalogService
     private function getProductUpdateMessage(array $products): ?string
     {
         $messages = [];
-        $message = 'Закуплены товары: ';
+        $message = Loc::getMessage("OTUS_AUTOSERVICE_PURCHASE_REQUEST");
 
         foreach ($products as $id => $qty) {
             $row = $this->getProductById($id);

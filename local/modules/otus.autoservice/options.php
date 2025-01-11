@@ -33,7 +33,9 @@ if (!$iblocksCatalog->isSuccess()) {
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocksCatalog));
 }
 
-$hlblocks = (new HighloadBlockService)->getList();
+$hlblockService = new HighloadBlockService;
+
+$hlblocks = $hlblockService->getList();
 
 if (!$hlblocks->isSuccess()) {
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($hlblocks));
@@ -60,6 +62,17 @@ if ($dealProps->isSuccess()) {
     foreach ($dealProps->getData() as $dealProp) {
         $dealPropsArr[$dealProp['CODE']] = '[' .$dealProp['CODE'] . '] ' . $dealProp['NAME'];
     }
+}
+
+// Тип группы товаров каталога которые являются запчастями
+$catalogProdTypeArr = [];
+if ($hlblockService->entityHLProdGropId) {
+   $entity = $hlblockService->getEntityHLById($hlblockService->entityHLProdGropId);
+   $rows = $hlblockService->getItemsList($entity, ['ID', 'UF_NAME', 'UF_XML_ID']);
+
+   foreach ($rows as $row) {
+       $catalogProdTypeArr[$row['ID']] = "[{$row['UF_XML_ID']}] {$row['UF_NAME']}";
+   }
 }
 
 $arMainPropsTab = [
@@ -112,6 +125,13 @@ $arMainPropsTab = [
         [
             "OTUS_AUTOSERVICE_HL_CAR_COLOR",
             Loc::getMessage("OTUS_AUTOSERVICE_HL_CAR_COLOR"),
+            null,
+            ["selectbox", $hlblArr]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_HL_PROD_GROUPS",
+            Loc::getMessage("OTUS_AUTOSERVICE_HL_PROD_GROUPS"),
             null,
             ["selectbox", $hlblArr]
         ],
@@ -193,12 +213,35 @@ $dealPropsTab = [
     ]
 ];
 
+$catalogPartsTab = [
+    "DIV" => "edit4",
+    "TAB" => Loc::getMessage("OTUS_AUTOSERVICE_CATALOG_PARTS_TAB_SETTINGS"),
+    "TITLE" => Loc::getMessage("OTUS_AUTOSERVICE_CATALOG_PARTS_TAB_SETTINGS"),
+    "OPTIONS" => [
+
+        [
+            "OTUS_AUTOSERVICE_CATALOG_PART_PROD_TYPE",
+            Loc::getMessage("OTUS_AUTOSERVICE_CATALOG_PART_PROD_TYPE"),
+            null,
+            ["selectbox", $catalogProdTypeArr]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_CATALOG_PART_PURCHASE_REQUEST_QTY",
+            Loc::getMessage("OTUS_AUTOSERVICE_CATALOG_PART_PURCHASE_REQUEST_QTY"),
+            $defaultOptions['OTUS_AUTOSERVICE_CATALOG_PART_PURCHASE_REQUEST_QTY'],
+            ["text"]
+        ],
+    ]
+];
+
 $aTabs = [
     $arMainPropsTab,
     $arCarPropsTab,
     $dealPropsTab,
+    $catalogPartsTab,
     [
-        "DIV" => "edit4",
+        "DIV" => "edit5",
         "TAB" => Loc::getMessage("MAIN_TAB_RIGHTS"),
         "TITLE" => Loc::getMessage("MAIN_TAB_TITLE_RIGHTS")
     ],
