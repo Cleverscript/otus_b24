@@ -1,23 +1,30 @@
 <?php
-
 namespace Otus\Autoservice\Handlers;
 
-use CIMNotify;
-use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Services\CarService;
 use Otus\Autoservice\Services\DealService;
 use Otus\Autoservice\Services\ModuleService;
 use Otus\Autoservice\Traits\HandlerTrait;
 use Otus\Autoservice\Traits\ModuleTrait;
+use Otus\Autoservice\Services\NotificationService;
 
 Loc::loadMessages(__FILE__);
 
-class  DealHandler
+class DealHandler
 {
     use ModuleTrait;
     use HandlerTrait;
 
+    /**
+     * Блокирует создание новой сделки ("Заказ наряд")
+     * если есть не закрытые, с таким же автомобилем
+     * @param $arFields
+     * @return false|void
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function beforeAdd(&$arFields)
     {
         $dealService = new DealService;
@@ -28,29 +35,25 @@ class  DealHandler
            $carName = $carService->getCarName($carId);
 
            if ($dealId = $dealService->getOpenDealByCar($carId)) {
-               $creatorId = $arFields['CREATED_BY_ID'];
-               $assignedId = $arFields['ASSIGNED_BY_ID'];
-
                $dealName = $dealService->getDealName($dealId);
 
-               if (Loader::includeModule("im")) {
-                   $fields = [
-                       "FROM_USER_ID" => $creatorId,
-                       "TO_USER_ID" => $assignedId,
-                       "NOTIFY_TYPE" => 4,
-                       "NOTIFY_MODULE" => self::$moduleId,
-                       "NOTIFY_TAG" => "",
-                       "NOTIFY_MESSAGE" => Loc::getMessage("OTUS_AUTOSERVICE_NOTIFY", ['#DEAL_ID#' => $dealId, '#DEAL_NAME#' => $dealName, '#CAR_NAME#' => $carName]),
-                   ];
-
-                   CIMNotify::Add($fields);
-               }
+               (new NotificationService)->sendNotification(
+                   $arFields['CREATED_BY_ID'],
+                   $arFields['ASSIGNED_BY_ID'],
+                   Loc::getMessage(
+                       "OTUS_AUTOSERVICE_NO_CLOSED_DEAL_BY_CAR_NOTIFY",
+                       [
+                           '#DEAL_ID#' => $dealId,
+                           '#DEAL_NAME#' => $dealName,
+                           '#CAR_NAME#' => $carName
+                       ]
+                   )
+               );
 
                return false;
            }
         }
     }
-
 
     /**
      * Хендлер для события OnAfterCrmDealAdd

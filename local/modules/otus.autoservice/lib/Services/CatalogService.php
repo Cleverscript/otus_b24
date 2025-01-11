@@ -1,6 +1,8 @@
 <?php
 namespace Otus\Autoservice\Services;
 
+use Bitrix\Main\Error;
+use Bitrix\Main\Result;
 use Bitrix\Main\Loader;
 use Bitrix\Iblock\Iblock;
 use Bitrix\Main\Localization\Loc;
@@ -86,9 +88,9 @@ class CatalogService
      * в которой содержатся ID товаров и запрошенное кол-во для закупки,
      * с привязкой к ID запроса по которому запущен бизнес процесс
      * @param int $reqId
-     * @return void
+     * @return array
      */
-    public function updateProductQtyRequest(int $reqId): void
+    public function updateProductQtyRequest(int $reqId): ?array
     {
         $rows = BpCatalogProductsTable::query()
             ->where('REQUEST_ID', $reqId)
@@ -96,7 +98,7 @@ class CatalogService
             ->fetchAll();
 
         if (empty($rows)) {
-            return;
+            return null;
         }
 
         $products = array_column($rows, 'QTY', 'PROD_ID');
@@ -125,7 +127,75 @@ class CatalogService
             }
         }
 
-        $this->deleteProductsInBp($rows);
+        $this->deleteProductsInBp(array_column($rows, 'ID'));
+
+        return $products;
+    }
+
+    /**
+     * Отправляет уведомления в колоколец,
+     * о кол-ве закупленных позиций по запросу на закупку
+     * @param array $products
+     * @param string $approverId
+     * @param string $creatorId
+     * @return Result
+     */
+    public function sendNotifyAfterUpdateQty(array $products, string $approverId, string $creatorId): Result
+    {
+        $result = new Result;
+
+        $approverId = intval(preg_replace("/[^0-9]/", '', $approverId));
+        $creatorId = intval(preg_replace("/[^0-9]/", '', $creatorId));
+
+        if (empty($products)) {
+            $result->addError(new Error(Loc::getMessage('OTUS_AUTOSERVICE_PRODUCT_NOT_FOUND')));
+        }
+
+        if (!$approverId) {
+            $result->addError(new Error(Loc::getMessage('OTUS_AUTOSERVICE_APPROVER_ID_NOT_FOUND')));
+        }
+
+        if (!$creatorId) {
+            $result->addError(new Error(Loc::getMessage('OTUS_AUTOSERVICE_CREATOR_ID_NOT_FOUND')));
+        }
+
+        if (!$result->isSuccess()) {
+            return $result;
+        }
+
+        $message = $this->getProductUpdateMessage($products);
+
+        (new NotificationService)->sendNotification(
+            $approverId,
+            $creatorId,
+            $message
+        );
+
+        return $result->setData(['message' => $message]);
+    }
+
+    /**
+     * Формирует текст сообщения для уведомления о закупленных позициях
+     * @param array $products
+     * @return string|null
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
+    private function getProductUpdateMessage(array $products): ?string
+    {
+        $message = 'Закуплены товары: ';
+
+        foreach ($products as $id => $qty) {
+            $row = $this->getProductById($id);
+
+            $message .=  Loc::getMessage("OTUS_AUTOSERVICE_PROD_MEASURE", [
+                '#NAME#' => $row['NAME'],
+                '#QTY#' => $qty,
+            ]);
+        }
+
+        return $message;
     }
 
     /**
@@ -133,11 +203,12 @@ class CatalogService
      * @param array $products
      * @return void
      */
-    private function deleteProductsInBp(array $products): void
+    private function deleteProductsInBp(array $ids): void
     {
-        foreach ($products as $product) {
-            $entity = BpCatalogProductsTable::getByPrimary($product['ID'])
+        foreach ($ids as $id) {
+            $entity = BpCatalogProductsTable::getByPrimary($id)
                 ->fetchObject();
+
             $entity->delete();
         }
     }
