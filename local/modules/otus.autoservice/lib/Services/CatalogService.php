@@ -184,18 +184,19 @@ class CatalogService
      */
     private function getProductUpdateMessage(array $products): ?string
     {
+        $messages = [];
         $message = 'Закуплены товары: ';
 
         foreach ($products as $id => $qty) {
             $row = $this->getProductById($id);
 
-            $message .=  Loc::getMessage("OTUS_AUTOSERVICE_PROD_MEASURE", [
+            $messages[] = Loc::getMessage("OTUS_AUTOSERVICE_PROD_MEASURE", [
                 '#NAME#' => $row['NAME'],
                 '#QTY#' => $qty,
             ]);
         }
 
-        return $message;
+        return $message . implode(', ', $messages);
     }
 
     /**
