@@ -1,7 +1,6 @@
 <?php
 namespace Otus\Autoservice\Services;
 
-use Bitrix\Main\Loader;
 use Bitrix\Iblock\Iblock;
 use Bitrix\Crm\ContactTable;
 use Bitrix\Main\Localization\Loc;
@@ -20,8 +19,6 @@ class CarService
 
     public function __construct()
     {
-        $this->includeModules();
-
         $this->iblockId = ModuleService::getInstance()->getPropVal('OTUS_AUTOSERVICE_IB_CARS');
 
         $this->highloadBlockService = new HighloadBlockService;
@@ -168,15 +165,5 @@ class CarService
         }
 
         return true;
-    }
-
-    private function includeModules(): void
-    {
-        if (!Loader::includeModule('highloadblock')) {
-            throw new \Exception(Loc::getMessage(
-                "OTUS_AUTOSERVICE_MODULE_IS_NOT_INSTALLED",
-                ['#MODULE_ID#' => 'highloadblock']
-            ));
-        }
     }
 }

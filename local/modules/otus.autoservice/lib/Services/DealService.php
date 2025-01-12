@@ -18,8 +18,6 @@ class DealService
 
     public function __construct()
     {
-        $this->includeModules();
-
         $this->moduleService = ModuleService::getInstance();
         $this->propCarCode = $this->moduleService->getPropVal('OTUS_AUTOSERVICE_DEAL_PROP_CAR');
 
@@ -173,15 +171,5 @@ class DealService
     public function getCategories()
     {
         return array_column(DealCategory::getAll(true), 'NAME', 'ID') ?: [];
-    }
-
-    private function includeModules(): void
-    {
-        if (!Loader::includeModule('crm')) {
-            throw new \Exception(Loc::getMessage(
-                "OTUS_AUTOSERVICE_MODULE_IS_NOT_INSTALLED",
-                ['#MODULE_ID#' => 'crm']
-            ));
-        }
     }
 }

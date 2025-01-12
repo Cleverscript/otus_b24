@@ -23,8 +23,6 @@ class HighloadBlockService
 
     public function __construct()
     {
-        $this->includeModules();
-
         $this->entityHLBrandId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_HL_CAR_BRAND");
         $this->entityHLModelId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_HL_CAR_MODEL");
         $this->entityHLColorId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_HL_CAR_COLOR");
@@ -95,15 +93,5 @@ class HighloadBlockService
             ->where('UF_XML_ID', $xmlId)
             ->setSelect(['*'])
             ->fetch();
-    }
-
-    private function includeModules(): void
-    {
-        if (!Loader::includeModule('highloadblock')) {
-            throw new \Exception(Loc::getMessage(
-                "OTUS_AUTOSERVICE_MODULE_IS_NOT_INSTALLED",
-                ['#MODULE_ID#' => 'otus.autoservice']
-            ));
-        }
     }
 }

@@ -102,7 +102,7 @@ class ActualizeQuantityAgent
         $prodGroupId = ModuleService::getInstance()->getPropVal('OTUS_AUTOSERVICE_CATALOG_PART_PROD_TYPE');
 
         $rows = ProductTable::query()
-            ->where('TIMESTAMP_X', '<', (new DateTime(date('d.m.Y'). ' 00:00:00')))
+            ->where('TIMESTAMP_X', '<', (new DateTime(date('d.m.Y') . ' 00:00:00')))
             ->where('UF_PRODUCT_GROUP', $prodGroupId)
             ->addSelect('ID')
             ->fetchAll();

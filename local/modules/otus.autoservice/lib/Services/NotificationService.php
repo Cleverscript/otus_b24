@@ -13,7 +13,7 @@ class NotificationService
 
     public function __construct()
     {
-        $this->includeModules();
+
     }
 
     public function sendNotification(int $creatorId, int $assignedId, string $mess): void
@@ -28,20 +28,5 @@ class NotificationService
         ];
 
         \CIMNotify::Add($fields);
-    }
-
-    /**
-     * Подключает модули
-     * @return void
-     * @throws \Bitrix\Main\LoaderException
-     */
-    private function includeModules(): void
-    {
-        if (!Loader::includeModule('im')) {
-            throw new \Exception(Loc::getMessage(
-                "OTUS_AUTOSERVICE_MODULE_IS_NOT_INSTALLED",
-                ['#MODULE_ID#' => 'im']
-            ));
-        }
     }
 }

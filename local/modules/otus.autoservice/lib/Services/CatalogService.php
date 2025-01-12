@@ -3,7 +3,6 @@ namespace Otus\Autoservice\Services;
 
 use Bitrix\Main\Error;
 use Bitrix\Main\Result;
-use Bitrix\Main\Loader;
 use Bitrix\Iblock\Iblock;
 use Bitrix\Main\Type\DateTime;
 use Bitrix\Main\Localization\Loc;
@@ -20,8 +19,6 @@ class CatalogService
 
     public function __construct()
     {
-        $this->includeModules();
-
         $this->iblockId = ModuleService::getInstance()->getPropVal('OTUS_AUTOSERVICE_IB_PARTS');
     }
 
@@ -238,21 +235,6 @@ class CatalogService
                 ->fetchObject();
 
             $entity->delete();
-        }
-    }
-
-    /**
-     * Подключает модули
-     * @return void
-     * @throws \Bitrix\Main\LoaderException
-     */
-    private function includeModules(): void
-    {
-        if (!Loader::includeModule('catalog')) {
-            throw new \Exception(Loc::getMessage(
-                "OTUS_AUTOSERVICE_MODULE_IS_NOT_INSTALLED",
-                ['#MODULE_ID#' => 'catalog']
-            ));
         }
     }
 }
