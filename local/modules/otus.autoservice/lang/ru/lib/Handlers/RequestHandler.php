@@ -1,2 +1,3 @@
 <?php
 $MESS['OTUS_AUTOSERVICE_REQUEST_NAME_DEFAULT'] = 'Запрос от #USER_NAME#';
+$MESS['OTUS_AUTOSERVICE_REQUEST_AUTO_NAME'] = 'Агент по закупкам';

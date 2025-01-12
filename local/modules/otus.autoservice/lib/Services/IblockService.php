@@ -1,9 +1,8 @@
 <?php
 namespace Otus\Autoservice\Services;
 
-use Bitrix\Main\Result;
 use Bitrix\Main\Error;
-use Bitrix\Main\Config\Option;
+use Bitrix\Main\Result;
 use Bitrix\Iblock\IblockTable;
 use Bitrix\Iblock\PropertyTable;
 use Bitrix\Main\Localization\Loc;
@@ -40,6 +39,14 @@ class IblockService
         ])->fetch()['IBLOCK_ID'];
     }
 
+    /**
+     * Возвращает объект со списком всех инфоблоков системы
+     * @param string $type
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function getIblocks(string $type): Result
     {
         $data = [];
@@ -93,5 +100,29 @@ class IblockService
         }
 
         return $result->setData($data);
+    }
+
+    /**
+     * Добавляет элемент инфоблока
+     * @param $fields
+     * @return Result
+     */
+    public function addIblockElement($fields): Result
+    {
+        $result = new Result;
+
+        $el = new \CIBlockElement;
+
+        if (!array_key_exists('IBLOCK_ID', $fields)) {
+            $fields['IBLOCK_ID'] = $this->iblockId;
+        }
+
+        if ($id = $el->Add($fields)) {
+            $result->setData(['ID' => $id]);
+        } else {
+            $result->addError(new Error($el->LAST_ERROR));
+        }
+
+        return $result;
     }
 }

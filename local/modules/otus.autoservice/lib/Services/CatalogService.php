@@ -72,9 +72,10 @@ class CatalogService
      * в которой содержатся ID товаров и запрошенное кол-во для закупки,
      * с привязкой к ID запроса по которому запущен бизнес процесс
      * @param int $reqId
+     * @param bool $sumUp - сумировать текущий остаток с указанным в запросе
      * @return array
      */
-    public function updateProductQtyRequest(int $reqId): ?array
+    public function updateProductQtyRequest(int $reqId, bool $sumUp = true): ?array
     {
         $rows = BpCatalogProductsTable::query()
             ->where('REQUEST_ID', $reqId)
@@ -88,7 +89,7 @@ class CatalogService
         $products = array_column($rows, 'QTY', 'PROD_ID');
 
         foreach ($products as $prodId => $qty) {
-            $this->updateProductQty($prodId, $qty);
+            $this->updateProductQty($prodId, $qty, $sumUp);
             $this->updateProductTimestampt($prodId);
         }
 
@@ -97,12 +98,14 @@ class CatalogService
         return $products;
     }
 
+
     /**
      * Определяет есть ли у товара предложения
      * и если да, то устанавливает им остаток остаток,
      * а если нет, то устанавливает остатоку непосредственно товару
-     * @param int $prodId
-     * @param int $qty
+     * @param int $prodId - ID товара
+     * @param int $qty - остаток
+     * @param bool $sumUp - сумировать текущий остаток с указанным в запросе
      * @return void
      */
     public function updateProductQty(int $prodId, int $qty, bool $sumUp = true): void

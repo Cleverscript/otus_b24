@@ -30,7 +30,7 @@ class RequestHandler
         if (self::$handlerDisallow) return;
         self::$handlerDisallow = true;
 
-        $userName = UserService::getFullName(CurrentUser::get()->getId());
+        $userName = CurrentUser::get()->getId() ? UserService::getFullName(CurrentUser::get()->getId()) : Loc::getMessage('OTUS_AUTOSERVICE_REQUEST_AUTO_NAME');
 
         $arFields['NAME'] =  Loc::getMessage('OTUS_AUTOSERVICE_REQUEST_NAME_DEFAULT',
             ['#USER_NAME#' => $userName]

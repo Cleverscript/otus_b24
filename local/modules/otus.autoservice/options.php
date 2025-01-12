@@ -235,13 +235,36 @@ $catalogPartsTab = [
     ]
 ];
 
+$debugTab = [
+    "DIV" => "edit5",
+    "TAB" => Loc::getMessage("OTUS_AUTOSERVICE_DEBUG_TAB_SETTINGS"),
+    "TITLE" => Loc::getMessage("OTUS_AUTOSERVICE_DEBUG_TAB_SETTINGS"),
+    "OPTIONS" => [
+
+        [
+            "OTUS_AUTOSERVICE_DEBUG_RANDOM_QTY_ZERO",
+            Loc::getMessage("OTUS_AUTOSERVICE_DEBUG_RANDOM_QTY_ZERO"),
+            null,
+            ["checkbox"]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_DEBUG_NOT_USED_TIMESTAMP_X_FILTER_PRODUCT",
+            Loc::getMessage("OTUS_AUTOSERVICE_DEBUG_NOT_USED_TIMESTAMP_X_FILTER_PRODUCT"),
+            null,
+            ["checkbox"]
+        ],
+    ]
+];
+
 $aTabs = [
     $arMainPropsTab,
     $arCarPropsTab,
     $dealPropsTab,
     $catalogPartsTab,
+    $debugTab,
     [
-        "DIV" => "edit5",
+        "DIV" => "edit6",
         "TAB" => Loc::getMessage("MAIN_TAB_RIGHTS"),
         "TITLE" => Loc::getMessage("MAIN_TAB_TITLE_RIGHTS")
     ],

@@ -9,6 +9,8 @@ const DEPENDENCE_MODULE = [
     'im',
     'crm',
     'iblock',
+    'bizproc',
+    'workflow',
     'catalog',
     'highloadblock'
 ];
