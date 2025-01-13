@@ -5,6 +5,7 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\HttpApplication;
 use Otus\Autoservice\Services\DealService;
 use Otus\Autoservice\Services\IblockService;
+use Otus\Autoservice\Services\BizProcService;
 use Otus\Autoservice\Services\HighloadBlockService;
 use Otus\Clinic\Utils\BaseUtils;
 
@@ -75,6 +76,9 @@ if ($hlblockService->entityHLProdGropId) {
    }
 }
 
+// Бизнес процессы для списоков
+$bizProcLists = BizProcService::getBizProcTemplates();
+
 $arMainPropsTab = [
     "DIV" => "edit1",
     "TAB" => Loc::getMessage("OTUS_AUTOSERVICE_MAIN_TAB_SETTINGS"),
@@ -106,6 +110,13 @@ $arMainPropsTab = [
             Loc::getMessage("OTUS_AUTOSERVICE_IB_PARTS"),
             null,
             ["selectbox", $iblocksCatalog->getData()]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_PURCHASE_REQUEST_BP_ID",
+            Loc::getMessage("OTUS_AUTOSERVICE_PURCHASE_REQUEST_BP_ID"),
+            null,
+            ["selectbox", $bizProcLists->getData()]
         ],
 
         [

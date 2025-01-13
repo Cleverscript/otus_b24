@@ -32,6 +32,12 @@ class PurchaseRequestService
         'rnd' => 'new'
     ];
 
+    /**
+     * Создает "Запрос на закупку" в инфоблоке тип список
+     * @param array $ids
+     * @return void
+     * @throws \Bitrix\Main\ArgumentOutOfRangeException
+     */
     public static function createPurchaseRequest(array $ids)
     {
         if (empty($ids)) {
@@ -41,6 +47,8 @@ class PurchaseRequestService
         $defaultOptions = Option::getDefaults(self::$moduleId);
 
         $moduleService = ModuleService::getInstance();
+
+        $bpId = $moduleService->getPropVal('OTUS_AUTOSERVICE_PURCHASE_REQUEST_BP_ID');
 
         $qty = $moduleService->getPropVal('OTUS_AUTOSERVICE_CATALOG_PART_PURCHASE_REQUEST_QTY') ?? 10;
 
@@ -67,7 +75,6 @@ class PurchaseRequestService
             throw new \Exception(BaseHelper::extractErrorMessage($addResult));
         }
 
-        $bpId = 31;
         $itemId = $addResult->getData()['ID'];
 
         $runBbResult = self::runBizProcItem($bpId, $itemId, $uid);
@@ -75,14 +82,6 @@ class PurchaseRequestService
         if (!$runBbResult->isSuccess()) {
             throw new \Exception(BaseHelper::extractErrorMessage($runBbResult));
         }
-
-        pLog([
-            __METHOD__ => [
-                $fields,
-                'addResult' => $addResult,
-                'runBbResult' => $runBbResult
-            ]
-        ]);
     }
 
     private static function runBizProcItem(int $bpId, int $itemId, int $uid): Result
