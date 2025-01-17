@@ -8,5 +8,3 @@ $MESS['OTUS_AUTOSERVICE_RIGHT_DENIED'] = 'Доступ запрещен';
 $MESS['OTUS_AUTOSERVICE_RIGHT_READ'] = 'Только чтение';
 $MESS['OTUS_AUTOSERVICE_RIGHT_WRITE_SETTINGS'] = 'Изменение настроек модуля';
 $MESS['OTUS_AUTOSERVICE_RIGHT_FULL'] = 'Полный доступ';
-$MESS[''] = '';
-$MESS[''] = '';

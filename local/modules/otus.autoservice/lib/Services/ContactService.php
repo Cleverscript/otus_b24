@@ -11,6 +11,15 @@ class ContactService
 
     }
 
+    /**
+     * Возвращает ФИО контакта
+     *
+     * @param int $id
+     * @return string|null
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function getFullName(int $id): ?string
     {
         if (!$id) {

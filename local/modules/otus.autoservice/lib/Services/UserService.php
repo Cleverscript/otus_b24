@@ -10,6 +10,12 @@ class UserService
 
     }
 
+    /**
+     * Возвращает ФИО пользователя
+     *
+     * @param int $id
+     * @return string|null
+     */
     public static function getFullName(int $id): ?string
     {
         if (!$id) {

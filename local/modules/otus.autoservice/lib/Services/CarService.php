@@ -29,6 +29,15 @@ class CarService
         return $this->iblockId;
     }
 
+    /**
+     * Возвращает общее кол-во элемнетов сущности автомобиль
+     *
+     * @param int $contactId
+     * @return int|null
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getCount(int $contactId)
     {
         if (!$contactId) {
@@ -43,6 +52,17 @@ class CarService
             ->getSelectedRowsCount();
     }
 
+    /**
+     * Возвращает автомобили контакта (клиента)
+     *
+     * @param int $contactId
+     * @param int $offset
+     * @param int $limit
+     * @return array
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getCars(int $contactId, int $offset = 0, int $limit = 5): array
     {
         if (!$contactId) {
@@ -127,6 +147,7 @@ class CarService
 
     /**
      * Возвращает название автомобиля
+     *
      * @param int $id
      * @return string
      * @throws \Bitrix\Main\ArgumentException
@@ -148,6 +169,15 @@ class CarService
             ->fetch()['NAME'];
     }
 
+    /**
+     * Проверяет есть ли в ИБ автомобиль по переданному VIN
+     *
+     * @param string $vin
+     * @return bool
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function isExists(string $vin): bool
     {
         $entity = Iblock::wakeUp($this->iblockId)->getEntityDataClass();
@@ -158,6 +188,12 @@ class CarService
                 ->getSelectedRowsCount() > 0;
     }
 
+    /**
+     * Метод валидации VIN
+     *
+     * @param string $vin
+     * @return bool
+     */
     public function isValidVin(string $vin): bool
     {
         if (strlen($vin) != 17) {

@@ -17,9 +17,10 @@ class ActualizeQuantityAgent
      * обновляет остатки у товаров относящихся к группе "Запчасти", этим значнием,
      * или если значение равняется нолю, генерирует запрос на закупку, при добавлении
      * которого запускается бизнес процесс для списка (инфоблок тип список)
+     *
      * @return string
      */
-    public static function run()
+    public static function run(): string
     {
         try {
             $result = PurchaseRequestService::getRandomQty();

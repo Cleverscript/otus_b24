@@ -34,6 +34,7 @@ class PurchaseRequestService
 
     /**
      * Создает "Запрос на закупку" в инфоблоке тип список
+     *
      * @param array $ids
      * @return void
      * @throws \Bitrix\Main\ArgumentOutOfRangeException
@@ -84,6 +85,15 @@ class PurchaseRequestService
         }
     }
 
+    /**
+     * Запускает определенный шаблон бизнес процесса
+     * для элемент аинфоблока тип список "Хапрос на закупку"
+     *
+     * @param int $bpId
+     * @param int $itemId
+     * @param int $uid
+     * @return Result
+     */
     private static function runBizProcItem(int $bpId, int $itemId, int $uid): Result
     {
         $result = new Result;
@@ -125,6 +135,7 @@ class PurchaseRequestService
 
     /**
      * Обновляет значение остатка товарам (запчастям)
+     *
      * @param int $qty
      * @param array $ids
      * @return void
@@ -150,6 +161,7 @@ class PurchaseRequestService
     /**
      * Возвращает товары (запчасти),
      * которые еще не были одновлены на сегодняшнюю дату
+     *
      * @return array
      * @throws \Bitrix\Main\ArgumentException
      * @throws \Bitrix\Main\LoaderException
@@ -176,6 +188,13 @@ class PurchaseRequestService
         return array_column($rows, 'ID');
     }
 
+    /**
+     * Устанавливает зачение в св-во QUANTITY элемента каталога
+     *
+     * @param int $productId
+     * @param int $qty
+     * @return void
+     */
     private static function setQty(int $productId, int $qty): void
     {
         if (!$productId) {
@@ -190,6 +209,12 @@ class PurchaseRequestService
         );
     }
 
+    /**
+     * Выполняет HTTP запрос во внешний рандом-сервис
+     * который возвращает рандомное число
+     *
+     * @return Result
+     */
     public static function getRandomQty(): Result
     {
         $httpClient = new HttpClient();
@@ -206,7 +231,7 @@ class PurchaseRequestService
             return $result->addError(new Error(implode(', ', $httpClient->getError())));
         }
 
-        $cnt = rand(0, $httpClient->getResult());
+        $cnt = rand(0, (int) $httpClient->getResult());
 
         return $result->setData(['result' => $cnt]);
     }

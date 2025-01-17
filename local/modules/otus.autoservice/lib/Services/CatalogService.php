@@ -29,6 +29,7 @@ class CatalogService
 
     /**
      * Возвращает элемент инфоблока каталога crm
+     *
      * @param int $id
      * @param array $fields
      * @return array
@@ -54,6 +55,15 @@ class CatalogService
             ->fetch();
     }
 
+    /**
+     * Добавляет запчтасть по запросу на закупку
+     * с указанием кол-ва которое нужно закупить
+     *
+     * @param int $reqId
+     * @param int $prodId
+     * @param int $qty
+     * @return void
+     */
     public function addProductQtyUpdate(int $reqId, int $prodId, int $qty): void
     {
         if (!$reqId) return;
@@ -71,7 +81,8 @@ class CatalogService
      * Обрабатывает записи из таблицы бизнес процесса "Запрос на закупку"
      * в которой содержатся ID товаров и запрошенное кол-во для закупки,
      * с привязкой к ID запроса по которому запущен бизнес процесс
-     * @param int $reqId
+     *
+     * @param int $reqId - ID запроса на закупку
      * @param bool $sumUp - сумировать текущий остаток с указанным в запросе
      * @return array
      */
@@ -133,6 +144,10 @@ class CatalogService
         }
     }
 
+    /**
+     * Метод обновления даты последнего изменения запчасти
+     * нужно для фильтра запчастей
+     */
     public function updateProductTimestampt(int $prodId): void
     {
         (new \CIBlockElement)->Update(

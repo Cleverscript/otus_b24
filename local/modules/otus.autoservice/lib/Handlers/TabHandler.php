@@ -14,6 +14,13 @@ Loc::loadMessages(__FILE__);
 
 class TabHandler
 {
+    /**
+     * Метод встраивания кастомного таба
+     * в базовую сущость "Контакт"
+     *
+     * @param Event $event
+     * @return EventResult
+     */
     public static function addTabs(Event $event): EventResult
     {
         $entityId = $event->getParameter('entityID');
@@ -56,6 +63,14 @@ class TabHandler
         ]);
     }
 
+    /**
+     * Метод формирования параметров кастомного таба
+     * для сущности "Контакт"
+     *
+     * @param $entityId
+     * @param $tabs
+     * @return array
+     */
     private static function addContactTabs($entityId, $tabs): array
     {
         $tabName = null;

@@ -4,6 +4,10 @@ namespace Otus\Autoservice\Tables;
 use Bitrix\Main\Entity\DataManager;
 use Bitrix\Main\ORM\Fields\IntegerField;
 
+/**
+ * Класс описывающий ORM модель сущности товара
+ * который используется в бизнес-процессе "Запрос на закупку"
+ */
 class BpCatalogProductsTable extends DataManager
 {
     public static function getTableName()

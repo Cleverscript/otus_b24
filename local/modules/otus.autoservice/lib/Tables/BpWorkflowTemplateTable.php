@@ -5,6 +5,9 @@ use Bitrix\Main\Entity\DataManager;
 use Bitrix\Main\ORM\Fields\IntegerField;
 use Bitrix\Main\ORM\Fields\StringField;
 
+/**
+ * Класс описывающий ORM модель базовой сущности "Шаблон бизнес-процесса"
+ */
 class BpWorkflowTemplateTable extends DataManager
 {
     public static function getTableName()

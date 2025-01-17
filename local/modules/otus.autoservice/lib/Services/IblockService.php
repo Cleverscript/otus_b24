@@ -23,6 +23,7 @@ class IblockService
 
     /**
      * Возвращает ID инфоблока эл-нта
+     *
      * @param int $elementId
      * @return mixed
      * @throws \Bitrix\Main\ArgumentException
@@ -41,6 +42,7 @@ class IblockService
 
     /**
      * Возвращает объект со списком всех инфоблоков системы
+     *
      * @param string $type
      * @return Result
      * @throws \Bitrix\Main\ArgumentException
@@ -72,6 +74,7 @@ class IblockService
 
     /**
      * Возвращает объект с массивом всех св-ств инфоблока
+     *
      * @return Result
      * @throws \Bitrix\Main\ArgumentException
      * @throws \Bitrix\Main\ObjectPropertyException
@@ -104,6 +107,7 @@ class IblockService
 
     /**
      * Добавляет элемент инфоблока
+     *
      * @param $fields
      * @return Result
      */

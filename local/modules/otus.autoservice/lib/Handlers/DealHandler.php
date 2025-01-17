@@ -19,6 +19,7 @@ class DealHandler
     /**
      * Блокирует создание новой сделки ("Заказ наряд")
      * если есть не закрытые, с таким же автомобилем
+     *
      * @param $arFields
      * @return false|void
      * @throws \Bitrix\Main\ArgumentException

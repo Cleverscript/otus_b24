@@ -9,6 +9,7 @@ class LogService
 
     /**
      * Добавляет запись в журнал событий
+     *
      * @param int|null $itemId
      * @param string $description
      * @param $auditTypeId

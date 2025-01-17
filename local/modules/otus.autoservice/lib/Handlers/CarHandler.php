@@ -26,6 +26,7 @@ class CarHandler
      * в котором подменяется NAME эл-та (автомобиля) введенное
      * пользователем в форме создания, на сформированный из значений
      * указанных в св-вах "Марка", "Модель" и "VIN"
+     *
      * @param $arFields
      * @return void
      * @throws \Bitrix\Main\ArgumentException

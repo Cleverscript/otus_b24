@@ -16,16 +16,34 @@ class ModuleService
         $this->setPropVals();
     }
 
+    /**
+     * Возвращает все св-ва модуля со значениями
+     *
+     * @return array
+     */
     public function getPropVals(): array
     {
         return $this->propVals;
     }
 
+    /**
+     * Возвращает значение опции модуля по ее коду
+     *
+     * @param string $key
+     * @return mixed
+     */
     public function getPropVal(string $key): mixed
     {
         return$this->propVals[$key] ?? null;
     }
 
+    /**
+     * Получает из базы данных все опции со сзначениями
+     * и записывает из в св-во
+     *
+     * @return void
+     * @throws \Bitrix\Main\DB\SqlQueryException
+     */
     private function setPropVals(): void
     {
         $conn = Application::getConnection();
@@ -35,4 +53,3 @@ class ModuleService
         );
     }
 }
-

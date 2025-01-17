@@ -19,6 +19,17 @@ class RequestHandler
 
     protected static int $entityIblockId;
 
+    /**
+     * Метод обработчика события
+     * добавления элемента в инфоблок "Запрос на закупку"
+     * позволяет определь NAME для добавляемого элемента
+     *
+     * @param $arFields
+     * @return void
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public static function onStartAdd(&$arFields)
     {
         self::$entityIblockId = Option::get(self::$moduleId, 'OTUS_AUTOSERVICE_IB_REQUESTS');

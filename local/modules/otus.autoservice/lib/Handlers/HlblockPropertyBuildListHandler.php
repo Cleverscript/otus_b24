@@ -175,6 +175,7 @@ class HlblockPropertyBuildListHandler
 
     /**
      * Метод отображения значения в публичной части
+     *
      * @param $arProperty
      * @param $arValue
      * @param $strHTMLControlName
@@ -203,6 +204,14 @@ class HlblockPropertyBuildListHandler
         return '';
     }
 
+    /**
+     * Метод отображения поля в форме элемента
+     *
+     * @param $arProperty
+     * @param $arValue
+     * @param $strHTMLControlName
+     * @return string
+     */
     public static function GetPublicEditHTML($arProperty, $arValue, $strHTMLControlName)
     {
         $settings = self::PrepareSettings($arProperty);

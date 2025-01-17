@@ -3,7 +3,6 @@ namespace Otus\Autoservice\Services;
 
 use Bitrix\Main\Result;
 use Bitrix\Main\Error;
-use Bitrix\Main\Loader;
 use Bitrix\Main\ORM\Entity;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
@@ -29,6 +28,15 @@ class HighloadBlockService
         $this->entityHLProdGropId = Option::get(self::$moduleId, "OTUS_AUTOSERVICE_HL_PROD_GROUPS");
     }
 
+    /**
+     * Возвращает список справочников
+     *
+     * @param array $filter
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getList(array $filter = []): Result
     {
         $result = new Result;
@@ -45,6 +53,17 @@ class HighloadBlockService
         return $result->setData($rows);
     }
 
+    /**
+     * Возвращает список записей сущности справочник, по фильту
+     *
+     * @param Entity $entity
+     * @param array $select
+     * @param array $filter
+     * @return array
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getItemsList(Entity $entity, array $select = [], array $filter = [])
     {
         return $entity->getDataClass()::query()
@@ -53,6 +72,15 @@ class HighloadBlockService
             ->fetchAll();
     }
 
+    /**
+     * Возвращает объект сущности справочника
+     *
+     * @param int $id
+     * @return Entity
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getEntityHLById(int $id): Entity
     {
         $hlblock = HighloadBlockTable::getById($id)->Fetch();
@@ -60,6 +88,14 @@ class HighloadBlockService
         return HighloadBlockTable::compileEntity($hlblock);
     }
 
+    /**
+     * Возвращает объект сущности справочника "Марка автомобиля"
+     *
+     * @return Entity
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getEntityHLBrand(): Entity
     {
         $hlblock = HighloadBlockTable::getById($this->entityHLBrandId)->Fetch();
@@ -67,6 +103,14 @@ class HighloadBlockService
         return HighloadBlockTable::compileEntity($hlblock);
     }
 
+    /**
+     * Возвращает объект сущности справочника "Модель автомобиля"
+     *
+     * @return Entity
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getEntityHLModel(): Entity
     {
         $hlblock = HighloadBlockTable::getById($this->entityHLModelId)->Fetch();
@@ -74,6 +118,14 @@ class HighloadBlockService
         return HighloadBlockTable::compileEntity($hlblock);
     }
 
+    /**
+     * Возвращает объект сущности справочника "Цвет автомобиля"
+     *
+     * @return Entity
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getEntityHLColor(): Entity
     {
         $hlblock = HighloadBlockTable::getById($this->entityHLColorId)->Fetch();
@@ -81,6 +133,17 @@ class HighloadBlockService
         return HighloadBlockTable::compileEntity($hlblock);
     }
 
+    /**
+     * Возвращает все данные элемента сущности справочника
+     * с фильтрацией по UF_XML_ID
+     *
+     * @param string $xmlId
+     * @param Entity $entity
+     * @return array
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getHLItemByXmlId(string $xmlId, Entity $entity): array
     {
         if (!$entity) {

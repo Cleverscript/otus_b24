@@ -1,7 +1,6 @@
 <?php
 namespace Otus\Autoservice\Services;
 
-use Bitrix\Main\Loader;
 use Bitrix\Main\Result;
 use Bitrix\Crm\DealTable;
 use Bitrix\Main\UserFieldTable;
@@ -28,6 +27,7 @@ class DealService
 
     /**
      * Возвращает код-во сделок по автомобилю
+     *
      * @param int $carId
      * @return int
      * @throws \Bitrix\Main\ArgumentException
@@ -48,6 +48,7 @@ class DealService
 
     /**
      * Возвращает не ID не закрытой сделки по автомобилю
+     *
      * @param int $carId
      * @return int
      * @throws \Bitrix\Main\ArgumentException
@@ -69,6 +70,7 @@ class DealService
 
     /**
      * Возвращает сделки по автомобилю
+     *
      * @param int $carId
      * @param int $offset
      * @param int $limit
@@ -115,6 +117,15 @@ class DealService
         return $result;
     }
 
+    /**
+     * Возвращает наименование Сделки
+     *
+     * @param int $dealId
+     * @return string|null
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getDealName(int $dealId): ?string
     {
         return DealTable::query()
@@ -123,6 +134,15 @@ class DealService
             ->fetch()['TITLE'];
     }
 
+    /**
+     * Возвращает ID категории (воронки) сделки
+     *
+     * @param int $dealId
+     * @return int
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     public function getDealCategoryId(int $dealId): int
     {
         return DealTable::query()
@@ -134,6 +154,7 @@ class DealService
     /**
      * Возвращает массив всех пользовательских св-ств
      * сущности сдлка CRM_DEAL
+     *
      * @return Result
      * @throws \Bitrix\Main\ArgumentException
      * @throws \Bitrix\Main\ObjectPropertyException
@@ -168,7 +189,13 @@ class DealService
         return $result->setData($data);
     }
 
-    public function getCategories()
+    /**
+     * Возвращает массив со списком категорий (воронок) сделок)
+     *
+     * @return array
+     * @throws \Bitrix\Main\ArgumentException
+     */
+    public function getCategories(): array
     {
         return array_column(DealCategory::getAll(true), 'NAME', 'ID') ?: [];
     }

@@ -1,7 +1,6 @@
 <?php
 namespace Otus\Autoservice\Services;
 
-use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Traits\ModuleTrait;
 
@@ -16,6 +15,14 @@ class NotificationService
 
     }
 
+    /**
+     * Отправляет уведомление в ЛС пользователю
+     *
+     * @param int $creatorId
+     * @param int $assignedId
+     * @param string $mess
+     * @return void
+     */
     public function sendNotification(int $creatorId, int $assignedId, string $mess): void
     {
         $fields = [

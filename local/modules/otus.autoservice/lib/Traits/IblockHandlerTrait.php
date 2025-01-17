@@ -7,6 +7,7 @@ trait IblockHandlerTrait
      * Возвращает истину или ложь является ли инфоблок разрешенным
      * для выполнения хендлер-методов на обработчиках событий
      * используется для прерывания выполнения
+     *
      * @param $elementId
      * @param string $moduleId
      * @param int $iblockId
