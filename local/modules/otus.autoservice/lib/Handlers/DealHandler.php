@@ -28,32 +28,55 @@ class DealHandler
      */
     public static function beforeAdd(&$arFields)
     {
+        if (self::$handlerDisallow) return;
+        self::$handlerDisallow = true;
+
         $dealService = new DealService;
+        $moduleService = ModuleService::getInstance();
 
-        if ($carId = $arFields[$dealService->propCarCode]) {
+        $dealPropCategoryId  = $moduleService->getPropVal('OTUS_AUTOSERVICE_DEAL_CATEGORY');
 
-           $carService = new CarService;
-           $carName = $carService->getCarName($carId);
+        $dealCategory = $arFields['CATEGORY_ID'];
 
-           if ($dealId = $dealService->getOpenDealByCar($carId)) {
-               $dealName = $dealService->getDealName($dealId);
-
-               (new NotificationService)->sendNotification(
-                   $arFields['CREATED_BY_ID'],
-                   $arFields['ASSIGNED_BY_ID'],
-                   Loc::getMessage(
-                       "OTUS_AUTOSERVICE_NO_CLOSED_DEAL_BY_CAR_NOTIFY",
-                       [
-                           '#DEAL_ID#' => $dealId,
-                           '#DEAL_NAME#' => $dealName,
-                           '#CAR_NAME#' => $carName
-                       ]
-                   )
-               );
-
-               return false;
-           }
+        if ($dealPropCategoryId != $dealCategory) {
+            return;
         }
+
+        $carId = $arFields[$dealService->propCarCode];
+
+        if (!$carId) {
+            $arFields['RESULT_MESSAGE'] = Loc::getMessage('OTUS_AUTOSERVICE_DEAL_ADD_ERROR_CAR_EMPTY');
+
+            return false;
+        }
+
+        $carService = new CarService;
+        $carName = $carService->getCarName($carId);
+
+        if ($dealId = $dealService->getOpenDealByCar($carId)) {
+           $dealName = $dealService->getDealName($dealId);
+
+           $errMessage = Loc::getMessage(
+                "OTUS_AUTOSERVICE_NO_CLOSED_DEAL_BY_CAR_NOTIFY",
+                [
+                    '#DEAL_ID#' => $dealId,
+                    '#DEAL_NAME#' => $dealName,
+                    '#CAR_NAME#' => $carName
+                ]
+            );
+
+           (new NotificationService)->sendNotification(
+               $arFields['CREATED_BY_ID'],
+               $arFields['ASSIGNED_BY_ID'],
+               $errMessage
+           );
+
+            $arFields['RESULT_MESSAGE'] = strip_tags($errMessage);
+
+           return false;
+        }
+
+        self::$handlerDisallow = false;
     }
 
     /**

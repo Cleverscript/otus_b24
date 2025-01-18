@@ -85,13 +85,6 @@ $arMainPropsTab = [
     "TITLE" => Loc::getMessage("OTUS_AUTOSERVICE_MAIN_TAB_SETTINGS_TITLE"),
     "OPTIONS" => [
         [
-            "OTUS_AUTOSERVICE_DEAL_CATEGORY",
-            Loc::getMessage("OTUS_AUTOSERVICE_DEAL_CATEGORY"),
-            null,
-            ["selectbox", $arDealCategories]
-        ],
-
-        [
             "OTUS_AUTOSERVICE_IB_CARS",
             Loc::getMessage("OTUS_AUTOSERVICE_IB_CARS"),
             null,
@@ -213,6 +206,12 @@ $dealPropsTab = [
     "TAB" => Loc::getMessage("OTUS_AUTOSERVICE_DEAL_PROPS_TAB_SETTINGS"),
     "TITLE" => Loc::getMessage("OTUS_AUTOSERVICE_DEAL_PROPS_TAB_SETTINGS"),
     "OPTIONS" => [
+        [
+            "OTUS_AUTOSERVICE_DEAL_CATEGORY",
+            Loc::getMessage("OTUS_AUTOSERVICE_DEAL_CATEGORY"),
+            null,
+            ["selectbox", $arDealCategories]
+        ],
 
         [
             "OTUS_AUTOSERVICE_DEAL_PROP_CAR",
