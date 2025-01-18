@@ -146,6 +146,28 @@ class CarService
     }
 
     /**
+     * Возвращает истину в зависимости от того
+     * пренадлежит автомобиль контакту или нет
+     *
+     * @param int $carId
+     * @param int $contactId
+     * @return bool
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
+    public function isCatRelatedContact(int $carId, int $contactId): bool
+    {
+        $entity = Iblock::wakeUp($this->iblockId)->getEntityDataClass();
+
+        return $entity::query()
+            ->where('ID', $carId)
+            ->where('CONTACT.VALUE', $contactId)
+            ->addSelect('ID')
+            ->exec()->getSelectedRowsCount() > 0;
+    }
+
+    /**
      * Возвращает название автомобиля
      *
      * @param int $id

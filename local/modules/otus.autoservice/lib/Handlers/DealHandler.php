@@ -1,6 +1,7 @@
 <?php
 namespace Otus\Autoservice\Handlers;
 
+use Bitrix\Main\Context;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Services\CarService;
 use Otus\Autoservice\Services\DealService;
@@ -31,6 +32,7 @@ class DealHandler
         if (self::$handlerDisallow) return;
         self::$handlerDisallow = true;
 
+        $carService = new CarService;
         $dealService = new DealService;
         $moduleService = ModuleService::getInstance();
 
@@ -42,16 +44,54 @@ class DealHandler
             return;
         }
 
+        $request = Context::getCurrent()->getRequest();
+
+        $clientData = json_decode($request->getPost('CLIENT_DATA'));
+
+        $contactEmptyErrorMess = Loc::getMessage('OTUS_AUTOSERVICE_DEAL_ADD_ERROR_CONTACT_EMPTY');
+
+        if (empty($clientData) || !is_object($clientData)) {
+            $arFields['RESULT_MESSAGE'] = $contactEmptyErrorMess;
+
+            return false;
+        }
+
+        if (!is_array($clientData->CONTACT_DATA)) {
+            $arFields['RESULT_MESSAGE'] = $contactEmptyErrorMess;
+
+            return false;
+        }
+
+        $contactData = current($clientData->CONTACT_DATA);
+
+        if (!property_exists($contactData, 'id')) {
+            $arFields['RESULT_MESSAGE'] = Loc::getMessage('OTUS_AUTOSERVICE_DEAL_ADD_ERROR_CONTACT_NEW_NOT_CAR');
+
+            return false;
+        }
+
         $carId = $arFields[$dealService->propCarCode];
 
+        // Проверяем что автомобиль указан
         if (!$carId) {
             $arFields['RESULT_MESSAGE'] = Loc::getMessage('OTUS_AUTOSERVICE_DEAL_ADD_ERROR_CAR_EMPTY');
 
             return false;
         }
 
-        $carService = new CarService;
         $carName = $carService->getCarName($carId);
+
+        // Проверяем что автомобиль пренадлежит контакту
+        if (!$carService->isCatRelatedContact($carId, $contactData->id)) {
+            $arFields['RESULT_MESSAGE'] = Loc::getMessage(
+                'OTUS_AUTOSERVICE_DEAL_ADD_ERROR_CAR_NOT_RELATED_CONTACT',
+                [
+                    '#CAR#' => $carName
+                ]
+            );
+
+            return false;
+        }
 
         if ($dealId = $dealService->getOpenDealByCar($carId)) {
            $dealName = $dealService->getDealName($dealId);
