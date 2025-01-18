@@ -5,6 +5,7 @@ use Bitrix\Main\Error;
 use Bitrix\Main\Result;
 use Bitrix\Iblock\IblockTable;
 use Bitrix\Iblock\PropertyTable;
+use Bitrix\Iblock\Model\Section;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Traits\ModuleTrait;
 
@@ -49,20 +50,18 @@ class IblockService
      * @throws \Bitrix\Main\ObjectPropertyException
      * @throws \Bitrix\Main\SystemException
      */
-    public static function getIblocks(string $type): Result
+    public static function getIblocks(array $filter): Result
     {
         $data = [];
         $result = new Result;
 
         $rows = IblockTable::getList([
-            'filter' => [
-                'IBLOCK_TYPE_ID' => $type,
-            ],
+            'filter' => $filter,
             'select' => ['ID', 'NAME']
         ])->fetchAll();
 
         if (empty($rows)) {
-            return $result->addError(new Error('Не удалось получить инфоблоки'));
+            return $result->addError(new Error(Loc::getMessage('OTUS_AUTOSERVICE_IBLOCK_NOT_FOUND')));
         }
 
         foreach ($rows as $row) {
@@ -70,6 +69,13 @@ class IblockService
         }
 
         return $result->setData($data);
+    }
+
+    public static function getIblocksByType(string $type): Result
+    {
+        return self::getIblocks([
+            'IBLOCK_TYPE_ID' => $type,
+        ]);
     }
 
     /**
@@ -128,5 +134,39 @@ class IblockService
         }
 
         return $result;
+    }
+
+    /**
+     * Возвращает список всех секций инфоблока
+     *
+     * @param int $iblockId
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
+    public static function getIblockSections(int $iblockId): Result
+    {
+        $result = new Result;
+
+        $entity = Section::compileEntityByIblock($iblockId);
+
+        $rows = $entity::query()
+            ->where('ACTIVE', 'Y')
+            ->where('GLOBAL_ACTIVE', 'Y')
+            ->setSelect(['ID', 'NAME'])
+            ->exec();
+
+        if (empty($rows)) {
+            return $result->addError(new Error(Loc::getMessage('OTUS_AUTOSERVICE_IBLOCK_SECTIONS_NOT_FOUND')));
+        }
+
+        $data = [];
+
+        foreach ($rows as $row) {
+            $data[$row['ID']] = $row['NAME'];
+        }
+
+        return $result->setData($data);
     }
 }

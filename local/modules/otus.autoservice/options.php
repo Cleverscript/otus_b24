@@ -7,6 +7,7 @@ use Otus\Autoservice\Services\DealService;
 use Otus\Autoservice\Services\IblockService;
 use Otus\Autoservice\Services\BizProcService;
 use Otus\Autoservice\Services\HighloadBlockService;
+use Otus\Autoservice\Services\DepartmentService;
 use Otus\Clinic\Utils\BaseUtils;
 
 $module_id = "otus.autoservice";
@@ -22,13 +23,13 @@ $request = HttpApplication::getInstance()->getContext()->getRequest();
 
 $defaultOptions = Option::getDefaults($module_id);
 
-$iblocksLists = IblockService::getIblocks('lists');
+$iblocksLists = IblockService::getIblocksByType('lists');
 
 if (!$iblocksLists->isSuccess()) {
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocksLists));
 }
 
-$iblocksCatalog = IblockService::getIblocks('CRM_PRODUCT_CATALOG');
+$iblocksCatalog = IblockService::getIblocksByType('CRM_PRODUCT_CATALOG');
 
 if (!$iblocksCatalog->isSuccess()) {
     CAdminMessage::ShowMessage(BaseUtils::extractErrorMessage($iblocksCatalog));
@@ -75,6 +76,9 @@ if ($hlblockService->entityHLProdGropId) {
        $catalogProdTypeArr[$row['ID']] = "[{$row['UF_XML_ID']}] {$row['UF_NAME']}";
    }
 }
+
+// Подразделения компании
+$arDepartments = DepartmentService::getAll();
 
 // Бизнес процессы для списоков
 $bizProcLists = BizProcService::getBizProcTemplates();
@@ -138,6 +142,13 @@ $arMainPropsTab = [
             Loc::getMessage("OTUS_AUTOSERVICE_HL_PROD_GROUPS"),
             null,
             ["selectbox", $hlblArr]
+        ],
+
+        [
+            "OTUS_AUTOSERVICE_DEPARTMENT_MECHANIC",
+            Loc::getMessage("OTUS_AUTOSERVICE_DEPARTMENT_MECHANIC"),
+            null,
+            ["selectbox", $arDepartments]
         ],
 
     ]

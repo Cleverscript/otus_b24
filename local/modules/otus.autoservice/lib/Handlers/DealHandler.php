@@ -6,6 +6,7 @@ use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Services\CarService;
 use Otus\Autoservice\Services\DealService;
 use Otus\Autoservice\Services\ModuleService;
+use Otus\Autoservice\Services\UserService;
 use Otus\Autoservice\Traits\HandlerTrait;
 use Otus\Autoservice\Traits\ModuleTrait;
 use Otus\Autoservice\Services\NotificationService;
@@ -93,6 +94,7 @@ class DealHandler
             return false;
         }
 
+        // Проверяем что нет не закрытых сделок с таким же автомобилем
         if ($dealId = $dealService->getOpenDealByCar($carId)) {
            $dealName = $dealService->getDealName($dealId);
 
@@ -114,6 +116,13 @@ class DealHandler
             $arFields['RESULT_MESSAGE'] = strip_tags($errMessage);
 
            return false;
+        }
+
+        // Проверяем что ответственный по сделке из подразделения "Механики"
+        if (!UserService::isMechanic($arFields['ASSIGNED_BY_ID'])) {
+            $arFields['RESULT_MESSAGE'] = Loc::getMessage('OTUS_AUTOSERVICE_DEAL_ADD_ASSIGNED_NOT_MECH');
+
+            return false;
         }
 
         self::$handlerDisallow = false;

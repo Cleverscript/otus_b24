@@ -2,6 +2,8 @@
 
 namespace Otus\Autoservice\Helpers;
 
+use Bitrix\Main\Result;
+
 class BaseHelper
 {
     /**

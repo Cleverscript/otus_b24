@@ -24,6 +24,7 @@ $MESS['OTUS_AUTOSERVICE_IB_CARS_PROP_VIN'] = 'VIN';
 $MESS['OTUS_AUTOSERVICE_IB_CARS_PROP_CONTACT'] = 'Контакт';
 $MESS['OTUS_AUTOSERVICE_DEAL_PROP_CAR'] = 'Автомобиль';
 $MESS['OTUS_AUTOSERVICE_CATALOG_PART_PROD_TYPE'] = 'Тип группы товара';
+$MESS['OTUS_AUTOSERVICE_DEPARTMENT_MECHANIC'] = 'Подразделение механиков';
 $MESS['OTUS_AUTOSERVICE_CATALOG_PART_PURCHASE_REQUEST_QTY'] = 'Кол-во для автоматической закупки запчастей';
 $MESS['OTUS_AUTOSERVICE_DEBUG_RANDOM_QTY_ZERO'] = 'Всегда нулевой остаток (при запуске на агенте)';
 $MESS['OTUS_AUTOSERVICE_DEBUG_NOT_USED_TIMESTAMP_X_FILTER_PRODUCT'] = 'Не использовать фильтр по дате обновления товров';
