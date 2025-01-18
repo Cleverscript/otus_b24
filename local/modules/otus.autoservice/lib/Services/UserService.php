@@ -22,6 +22,13 @@ class UserService
             return null;
         }
 
-       return CurrentUser::get()->getFullName();
+        $rsUser = \CUser::GetByID($id);
+        $arUser = $rsUser->Fetch();
+
+        return implode(' ', [
+            $arUser['NAME'],
+            $arUser['SECOND_NAME'],
+            $arUser['LAST_NAME']
+        ]);
     }
 }
