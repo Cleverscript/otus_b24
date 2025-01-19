@@ -11,6 +11,7 @@ use Bitrix\Catalog\Model\Product;
 use Bitrix\Main\Localization\Loc;
 use Otus\Autoservice\Helpers\BaseHelper;
 use Otus\Autoservice\Traits\ModuleTrait;
+use Otus\Autoservice\Services\LogService;
 use Otus\Autoservice\Services\ModuleService;
 use Otus\Autoservice\Services\IblockService;
 use Otus\Autoservice\Services\CatalogService;
@@ -156,6 +157,18 @@ class PurchaseRequestService
             $catalogService->updateProductQty($prodId, $qty, false);
             $catalogService->updateProductTimestampt($prodId);
         }
+
+        LogService::writeSysLog(
+            null,
+            Loc::getMessage(
+                'OTUS_AUTOSERVICE_UPD_PRODUCT_QUANTITY',
+                [
+                    '#IDS#' => implode(', ', $ids),
+                    '#QTY#' => $qty
+                ]
+            ),
+            'OTUS_AUTOSERVICE_UPD_PRODUCT_QUANTITY'
+        );
     }
 
     /**
