@@ -135,6 +135,23 @@ class DealService
     }
 
     /**
+     * Возвращает ID ответсвенного по Сделке
+     *
+     * @param int $dealId
+     * @return string|null
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
+    public function getDealAssigned(int $dealId): ?string
+    {
+        return DealTable::query()
+            ->where('ID', $dealId)
+            ->addSelect('ASSIGNED_BY_ID')
+            ->fetch()['ASSIGNED_BY_ID'];
+    }
+
+    /**
      * Возвращает ID категории (воронки) сделки
      *
      * @param int $dealId

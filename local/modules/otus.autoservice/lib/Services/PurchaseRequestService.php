@@ -161,13 +161,13 @@ class PurchaseRequestService
         LogService::writeSysLog(
             null,
             Loc::getMessage(
-                'OTUS_AUTOSERVICE_UPD_PRODUCT_QUANTITY',
+                'OTUS_AUTOSERVICE_ACTUALIZE_QUANTITY_AGENT',
                 [
                     '#IDS#' => implode(', ', $ids),
                     '#QTY#' => $qty
                 ]
             ),
-            'OTUS_AUTOSERVICE_UPD_PRODUCT_QUANTITY'
+            'OTUS_AUTOSERVICE_ACTUALIZE_QUANTITY_AGENT'
         );
     }
 

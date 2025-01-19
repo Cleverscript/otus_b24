@@ -94,9 +94,14 @@ class DealHandler
             return false;
         }
 
-        // Проверяем что нет не закрытых сделок с таким же автомобилем
+        /**
+         * Если уже есть не закрытый заказ-наряд с таким же автомобилем
+         * то блокируем создаение сделки, и отправляем увед ответственному
+         * по не закрытой сделке
+         */
         if ($dealId = $dealService->getOpenDealByCar($carId)) {
            $dealName = $dealService->getDealName($dealId);
+           $dealAssigned = $dealService->getDealAssigned($dealId);
 
            $errMessage = Loc::getMessage(
                 "OTUS_AUTOSERVICE_NO_CLOSED_DEAL_BY_CAR_NOTIFY",
@@ -109,7 +114,7 @@ class DealHandler
 
            (new NotificationService)->sendNotification(
                $arFields['CREATED_BY_ID'],
-               $arFields['ASSIGNED_BY_ID'],
+               $dealAssigned,
                $errMessage
            );
 
