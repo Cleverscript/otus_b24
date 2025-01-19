@@ -130,7 +130,7 @@ class otus_autoservice extends CModule
     protected function getEventsArray()
     {
         return [
-            ['iblock', 'OnStartIBlockElementAdd', '\\Otus\\Autoservice\\Handlers\\RequestHandler', 'onStartAdd'],
+            ['iblock', 'OnStartIBlockElementAdd', '\\Otus\\Autoservice\\Handlers\\PurchaseRequestHandler', 'onStartAdd'],
             ['iblock', 'OnStartIBlockElementAdd', '\\Otus\\Autoservice\\Handlers\\CarHandler', 'onStartAdd'],
             ['iblock', 'OnBeforeIBlockElementAdd', '\\Otus\\Autoservice\\Handlers\\CarHandler', 'beforeAdd'],
             ['iblock', 'OnIBlockPropertyBuildList', '\\Otus\\Autoservice\\Handlers\\HlblockPropertyBuildListHandler', 'GetUserTypeDescription'],

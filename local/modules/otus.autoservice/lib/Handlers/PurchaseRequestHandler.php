@@ -11,7 +11,7 @@ use Otus\Autoservice\Traits\IblockHandlerTrait;
 
 Loc::loadMessages(__FILE__);
 
-class RequestHandler
+class PurchaseRequestHandler
 {
     use HandlerTrait;
     use ModuleTrait;
