@@ -66,7 +66,7 @@ class CarService
     public function getCars(int $contactId, int $offset = 0, int $limit = 5): array
     {
         if (!$contactId) {
-            return 0;
+            return [];
         }
 
         $result = [];

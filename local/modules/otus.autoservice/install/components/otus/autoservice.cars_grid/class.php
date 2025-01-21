@@ -5,11 +5,13 @@ use Bitrix\Main\Error;
 use Bitrix\Main\Result;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Context;
-use Bitrix\Main\Config\Option;
+use Bitrix\Main\Data\Cache;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\UI\PageNavigation;
 use Otus\Autoservice\Helpers\BaseHelper;
 use Otus\Autoservice\Services\CarService;
+use Otus\Autoservice\Enums\CacheTimeEnum;
+use Otus\Autoservice\Services\ModuleService;
 use Otus\Autoservice\Services\IblockService;
 
 Loc::loadMessages(__FILE__);
@@ -17,22 +19,26 @@ Loc::loadMessages(__FILE__);
 class CarGrid extends CBitrixComponent
 {
     const GRID_ID = 'otus_cars_grid';
+    const MODULE_ID = 'otus.autoservice';
+
 	public function executeComponent(): void
 	{
         try {
             if ($this->startResultCache(false, [$this->arParams['ENTITY_ID']])) {
-                if (!Loader::includeModule('otus.autoservice')) {
+                if (!Loader::includeModule(self::MODULE_ID)) {
                     throw new \RuntimeException(Loc::getMessage('OTUS_AUTOSERVICE_FAIL_INCLUDE_MODULE'));
                 }
 
                 $request = Context::getCurrent()->getRequest();
 
-                $carIblockId = Option::get('otus.autoservice', "OTUS_AUTOSERVICE_IB_CARS");
+                $moduleService = ModuleService::getInstance();
+
+                $carIblockId = $moduleService->getPropVal('OTUS_AUTOSERVICE_IB_CARS');
 
                 $carService = new CarService;
                 $carIblockService = new IblockService($carIblockId);
 
-                $entityId = (int) $this->arParams['ENTITY_ID'];
+                $entityId = (int)$this->arParams['ENTITY_ID'];
 
                 if (!$entityId) {
                     throw new \RuntimeException(Loc::getMessage('OTUS_AUTOSERVICE_ENTITY_ID_IS_EMPTY'));
@@ -87,14 +93,23 @@ class CarGrid extends CBitrixComponent
                     'SHOW_ROW_CHECKBOXES',
                     'ALLOW_SORT'
                 ]);
+
+                $this->IncludeComponentTemplate();
             }
         } catch (\Throwable $e) {
             ShowError($e->getMessage());
         }
-
-        $this->IncludeComponentTemplate();
 	}
 
+    /**
+     * Возвращает колонки грида
+     *
+     * @param IblockService $carIblockService
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
     private function getColumns(IblockService $carIblockService): Result
     {
         $result = new Result;
@@ -119,6 +134,18 @@ class CarGrid extends CBitrixComponent
         return $result->setData($columns);
     }
 
+    /**
+     * Возвращает данные для грида (автомобили клиента)
+     *
+     * @param CarService $carIblockService
+     * @param int $contactId
+     * @param int $page
+     * @param int $limit
+     * @return Result
+     * @throws \Bitrix\Main\ArgumentException
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     */
 	private function getRows(CarService $carIblockService, int $contactId, int $page = 1, int $limit = 5): Result
 	{
         $result = new Result;
@@ -130,31 +157,52 @@ class CarGrid extends CBitrixComponent
 
         $offset = $limit * ($page-1);
 
-        $rows = $carIblockService->getCars($contactId, $offset, $limit);
+        $cache = Cache::createInstance();
 
-        if (empty($rows)) {
-            return $result->addError(new Error(Loc::getMessage('OTUS_AUTOSERVICE_ORDERS_NOT_FOUNT')));
-        }
+        $cacheTime = $this->arParams['CACHE_TIME'] ?? CacheTimeEnum::HOUR;
+        $cacheId = md5(serialize([$contactId, $offset, $limit]));
 
-        foreach ($rows as $row) {
-            $params = 'CAR_ID=' . $row['ID'] . '&site=' . \SITE_ID . '&' . \bitrix_sessid_get();
+        if ($cache->initCache($cacheTime, $cacheId, '/otus_autoservice/cars_grid')) {
+            $data = $cache->getVars();
+        } elseif ($cache->startDataCache()) {
+            $rows = $carIblockService->getCars($contactId, $offset, $limit);
 
-            $data[] = [
-                'id' => $row['ID'],
-                'columns' => $row,
-                'actions' => [
-                    [
-                        'text' => Loc::getMessage('OTUS_AUTOSERVICE_CAR_SHOW_HISTORY'),
-                        'default' => true,
-                        'onclick' => "BX.SidePanel.Instance.open('/local/components/otus/autoservice.car_show/lazyload.ajax.php?{$params}', {
+            if (empty($rows)) {
+                $cache->abortDataCache();
+
+                return $result->addError(new Error(Loc::getMessage('OTUS_AUTOSERVICE_ORDERS_NOT_FOUNT')));
+            }
+
+            foreach ($rows as $row) {
+                $arParams = [
+                    'CAR_ID' => $row['ID'],
+                    'site' => \SITE_ID,
+                    'CACHE_TYPE' => $this->arParams['CACHE_TYPE'],
+                    'CACHE_GROUPS' => $this->arParams['CACHE_GROUPS'],
+                    'CACHE_TIME' => $cacheTime
+                ];
+
+                $params = http_build_query($arParams) . '&' . \bitrix_sessid_get();
+
+                $data[] = [
+                    'id' => $row['ID'],
+                    'columns' => $row,
+                    'actions' => [
+                        [
+                            'text' => Loc::getMessage('OTUS_AUTOSERVICE_CAR_SHOW_HISTORY'),
+                            'default' => true,
+                            'onclick' => "BX.SidePanel.Instance.open('/local/components/otus/autoservice.car_show/lazyload.ajax.php?{$params}', {
                             allowChangeHistory: false,
                             animationDuration: 100,
                             width: 1100,
                             cacheable: false,
                         })",
-                    ],
-                ]
-            ];
+                        ],
+                    ]
+                ];
+            }
+
+            $cache->endDataCache($data);
         }
 
         return $result->setData($data);

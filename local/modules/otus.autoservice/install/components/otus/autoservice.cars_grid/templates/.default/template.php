@@ -38,7 +38,8 @@ $APPLICATION->IncludeComponent(
             ['NAME' => '50', 'VALUE' => '50'],
             ['NAME' => '100', 'VALUE' => '100']
         ],
-    ]
+    ],
+    $this->getComponent()
 );
 ?>
 <?php if (!empty($arParams['AJAX_LOADER'])) { ?>
