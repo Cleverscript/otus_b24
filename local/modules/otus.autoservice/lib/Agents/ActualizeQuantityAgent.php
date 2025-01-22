@@ -45,7 +45,7 @@ class ActualizeQuantityAgent
         } catch (\Throwable $e) {
             LogService::writeSysLog(
                 null,
-                $e->getMessage() . ': ---' . $e->getTraceAsString(),
+                $e->getMessage() . ': ' . $e->getTraceAsString(),
                 'OTUS_AUTOSERVICE_ACTUALIZE_QUANTITY_AGENT',
                 'ERROR'
             );
