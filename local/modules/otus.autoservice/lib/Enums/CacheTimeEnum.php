@@ -2,10 +2,6 @@
 
 namespace Otus\Autoservice\Enums;
 
-/**
- * Class CacheTimeEnum
- * @package NotaMsp\Enum
- */
 class CacheTimeEnum
 {
     public const MINUTE = 60; //60
